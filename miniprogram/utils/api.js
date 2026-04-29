@@ -12,7 +12,7 @@ function health() {
 }
 
 function login({ phone, password } = {}) {
-  return request.post('/api/auth/login', { phone, password });
+  return request.post('/api/login', { phone, password });
 }
 
 function refreshToken() {

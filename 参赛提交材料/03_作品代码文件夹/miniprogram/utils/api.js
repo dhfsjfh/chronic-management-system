@@ -184,7 +184,7 @@ function demoStatus() {
 }
 
 function judgeLogin(phone, password) {
-  return request.post('/api/auth/login', { phone, password });
+  return request.post('/api/login', { phone, password });
 }
 
 module.exports = {

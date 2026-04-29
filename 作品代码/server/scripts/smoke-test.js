@@ -49,7 +49,7 @@ async function main() {
   const demo = await http('GET', '/api/demo/status');
   results.push(['/api/demo/status', typeof demo.demoMode === 'boolean']);
 
-  const login = await http('POST', '/api/auth/login', {
+  const login = await http('POST', '/api/login', {
     phone: process.env.JUDGE_PHONE || '13800138001',
     password: process.env.JUDGE_PASSWORD || '123'
   });

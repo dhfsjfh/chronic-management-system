@@ -15,7 +15,19 @@
 
 ## 用户与认证
 
+### POST `/api/login`
+
+公开前端统一使用此登录接口。
+
+Body：
+
+```json
+{ "phone": "13800138001", "password": "123" }
+```
+
 ### POST `/api/auth/login`
+
+兼容旧路径，行为同 `/api/login`。
 
 Body：
 

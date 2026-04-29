@@ -7,13 +7,13 @@
 // AI辅助生成：Cursor，已人工修改适配
 var ApiService = (function () {
 
-  var API_BASE = 'https://api.example.com/v1';
+  var API_BASE = 'https://chronic-management-system.onrender.com';
 
   // 接口路径定义
   var ENDPOINTS = {
-    login: '/user/login',
-    getUserInfo: '/user/info',
-    updateUserInfo: '/user/update',
+    login: '/api/login',
+    getUserInfo: '/api/user/profile',
+    updateUserInfo: '/api/user/profile',
     submitHealthData: '/health/submit',
     getHealthRecords: '/health/records',
     getHealthTrend: '/health/trend',
@@ -59,7 +59,7 @@ var ApiService = (function () {
         if (result.code === 0 || result.code === 200) {
           return result.data || result;
         }
-        throw new Error(result.msg || '请求失败');
+        throw new Error(result.message || result.msg || '请求失败');
       });
   }
 
@@ -70,16 +70,8 @@ var ApiService = (function () {
    * @returns {Promise}
    */
   function login(username, password) {
-    // 使用模拟登录
-    return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        if (username === 'admin' && password === '123') {
-          resolve({ token: 'demo_token_2026', userInfo: { nickName: '李建国', cardNo: 'CDM20260001' } });
-        } else {
-          reject(new Error('用户名或密码错误'));
-        }
-      }, 500);
-    });
+    var phone = /^\d{6,}$/.test(String(username || '').trim()) ? username : '13800138001';
+    return request(ENDPOINTS.login, 'POST', { phone: phone, password: password });
   }
 
   /**

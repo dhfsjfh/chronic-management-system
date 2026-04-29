@@ -208,7 +208,7 @@ function insertWorkflowRun({
 // ================================================================
 // 🔐 认证模块
 // ================================================================
-app.post('/api/auth/login', (req, res) => {
+function handleLogin(req, res) {
   try {
     const { phone, password } = req.body;
     if (!phone) return res.status(400).json(fail('手机号不能为空', 400));
@@ -230,7 +230,10 @@ app.post('/api/auth/login', (req, res) => {
     };
     res.json(ok({ token: issueToken(u), user: u, demoMode: DEMO_MODE }));
   } catch (err) { res.status(500).json(fail(err.message)); }
-});
+}
+
+app.post('/api/login', handleLogin);
+app.post('/api/auth/login', handleLogin);
 
 app.get('/api/auth/refresh', (req, res) => {
   if (!req.user) return res.status(401).json(fail('未登录', 401));

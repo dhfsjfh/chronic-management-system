@@ -14,7 +14,7 @@ var AppConfig = (function () {
     buildDate: '2026-04',
 
     // API配置
-    apiBaseUrl: localStorage.getItem('cdm_api_base') || 'https://api.example.com/v1',
+    apiBaseUrl: localStorage.getItem('cdm_api_base') || 'https://chronic-management-system.onrender.com',
     requestTimeout: 10000,
 
     // 模拟数据开关（生产环境关闭）

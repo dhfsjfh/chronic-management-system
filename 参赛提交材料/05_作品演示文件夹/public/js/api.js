@@ -7,8 +7,9 @@
 
   function apiBase() {
     var b = typeof w.__API_BASE_PATH__ === 'string' ? w.__API_BASE_PATH__.replace(/\/+$/, '') : '';
-    if (b === '') return '/api';
-    return b + '/api';
+    var origin = typeof w.__API_ORIGIN__ === 'string' ? w.__API_ORIGIN__.replace(/\/+$/, '') : '';
+    var base = b === '' ? '/api' : b + '/api';
+    return origin ? origin + base : base;
   }
 
   /** 将 '/api/patients' 或 'patients' 统一为远端路径 */
@@ -90,11 +91,15 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phone, password: password })
       });
-      var j = await r.json();
-      if (!j.ok) throw new Error(j.message || '登录失败');
-      sessionStorage.setItem('demo_token', j.data.token);
-      sessionStorage.setItem('demo_user', JSON.stringify(j.data.user));
-      return j.data;
+      var j = await r.json().catch(function () {
+        throw new Error('登录接口返回了非 JSON 内容，请检查 API 地址');
+      });
+      var ok = j && (j.ok === true || j.code === 200);
+      if (!ok) throw new Error((j && j.message) || '登录失败');
+      var data = j.data || {};
+      sessionStorage.setItem('demo_token', data.token);
+      sessionStorage.setItem('demo_user', JSON.stringify(data.user));
+      return data;
     },
 
     logout: function () {
@@ -121,10 +126,13 @@
       }
 
       var r = await fetch(apiUrl(pathLike), { headers: { Authorization: 'Bearer ' + token() } });
-      var j = await r.json();
-      if (!j.ok) {
+      var j = await r.json().catch(function () {
+        throw new Error('接口返回了非 JSON 内容，请检查 API 地址');
+      });
+      var ok = j && (j.ok === true || j.code === 200);
+      if (!ok) {
         if (r.status === 401) w.location.href = 'login.html';
-        throw new Error(j.message || '请求失败');
+        throw new Error((j && j.message) || '请求失败');
       }
       return j.data;
     }
