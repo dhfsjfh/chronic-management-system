@@ -1,0 +1,106 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/checkin/checkin",
+    "pages/record/record",
+    "pages/ai/chat",
+    "pages/msg/msg"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "社区慢病管理",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f5f5",
+    "enablePullDownRefresh": true,
+    "onReachBottomDistance": 50
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1890ff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/images/tab-home.png",
+        "selectedIconPath": "assets/images/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/checkin/checkin",
+        "text": "打卡",
+        "iconPath": "assets/images/tab-checkin.png",
+        "selectedIconPath": "assets/images/tab-checkin-active.png"
+      },
+      {
+        "pagePath": "pages/record/record",
+        "text": "档案",
+        "iconPath": "assets/images/tab-record.png",
+        "selectedIconPath": "assets/images/tab-record-active.png"
+      },
+      {
+        "pagePath": "pages/ai/chat",
+        "text": "AI咨询",
+        "iconPath": "assets/images/tab-ai.png",
+        "selectedIconPath": "assets/images/tab-ai-active.png"
+      },
+      {
+        "pagePath": "pages/msg/msg",
+        "text": "消息",
+        "iconPath": "assets/images/tab-msg.png",
+        "selectedIconPath": "assets/images/tab-msg-active.png"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于获取您的位置以便推荐附近医院"
+    },
+    "scope.record": {
+      "desc": "用于语音输入健康问题"
+    },
+    "scope.camera": {
+      "desc": "用于拍照识别血糖仪、血压计读数"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseAddress"
+  ],
+  "usingComponents": {
+    "van-button": "@vant/weapp/button/index",
+    "van-cell": "@vant/weapp/cell/index",
+    "van-cell-group": "@vant/weapp/cell-group/index",
+    "van-field": "@vant/weapp/field/index",
+    "van-toast": "@vant/weapp/toast/index",
+    "van-dialog": "@vant/weapp/dialog/index",
+    "van-loading": "@vant/weapp/loading/index",
+    "van-icon": "@vant/weapp/icon/index",
+    "van-notify": "@vant/weapp/notify/index",
+    "van-nav-bar": "@vant/weapp/nav-bar/index",
+    "van-tab": "@vant/weapp/tab/index",
+    "van-tabs": "@vant/weapp/tabs/index",
+    "van-card": "@vant/weapp/card/index",
+    "van-tag": "@vant/weapp/tag/index",
+    "van-search": "@vant/weapp/search/index",
+    "van-swipe-cell": "@vant/weapp/swipe-cell/index",
+    "van-action-sheet": "@vant/weapp/action-sheet/index",
+    "van-picker": "@vant/weapp/picker/index",
+    "van-datetime-picker": "@vant/weapp/datetime-picker/index",
+    "van-slider": "@vant/weapp/slider/index",
+    "van-stepper": "@vant/weapp/stepper/index",
+    "van-empty": "@vant/weapp/empty/index",
+    "van-image": "@vant/weapp/image/index",
+    "van-circle": "@vant/weapp/circle/index"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "componentPlaceholder": {
+    "van-button": "van-button",
+    "van-icon": "van-icon"
+  },
+  "darkmode": false,
+  "locale": "zh-Hans"
+}

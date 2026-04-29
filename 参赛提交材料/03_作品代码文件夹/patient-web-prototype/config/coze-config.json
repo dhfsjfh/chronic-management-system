@@ -1,0 +1,35 @@
+{
+  "appName": "社区慢病管理系统",
+  "version": "2.0.0",
+  "coze": {
+    "patToken": "",
+    "workspaceId": "7621844767555026944",
+    "botId": "7633758824825946155",
+    "workflowId": "7621844767555026944"
+  },
+  "database": {
+    "name": "慢病管理数据同步",
+    "fields": [
+      "id",
+      "user_id",
+      "user_name",
+      "content",
+      "source",
+      "data_type",
+      "extra_data",
+      "created_at"
+    ]
+  },
+  "workflows": [
+    {
+      "name": "submit_health_data",
+      "description": "写入健康数据到Coze数据库",
+      "params": ["user_id", "data_type", "content", "source"]
+    },
+    {
+      "name": "get_latest_data",
+      "description": "从Coze数据库获取最新健康数据",
+      "params": ["user_id"]
+    }
+  ]
+}

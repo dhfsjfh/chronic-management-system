@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: community-chronic-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEMO_MODE
+        value: "true"
+      - key: PUBLIC_API_READONLY
+        value: "true"
+      - key: JUDGE_ACCOUNT_PHONE
+        value: "13800138001"
+      - key: JUDGE_ACCOUNT_PASSWORD
+        value: "123"
+      - key: ALLOWED_ORIGINS
+        value: ""

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登录 — 社区慢病管理演示</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-logo">医</div>
+          <div>
+            <h1>演示登录</h1>
+            <p class="sub">本地模拟认证 · 无真实患者数据外传</p>
+          </div>
+        </div>
+        <a class="btn btn-ghost" href="index.html">返回首页</a>
+      </header>
+
+      <div class="card" style="max-width: 420px; margin: 0 auto">
+        <h2 class="hero-title" style="font-size: 1.2rem">账号登录</h2>
+        <div id="err" class="alert alert-error"></div>
+        <form id="form" novalidate>
+          <div class="form-group">
+            <label for="phone">手机号</label>
+            <input id="phone" type="text" autocomplete="username" placeholder="演示：13800138001" />
+          </div>
+          <div class="form-group">
+            <label for="pwd">密码</label>
+            <input id="pwd" type="password" autocomplete="current-password" placeholder="演示：123" />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">登录</button>
+        </form>
+        <p class="note">演示账号：13800138001 / 123</p>
+      </div>
+
+      <p class="footer-hint"><a href="patients.html">若已在本浏览器登录过可直接进入患者列表</a></p>
+    </div>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+      if (DemoApi.token()) location.replace('patients.html');
+
+      document.getElementById('form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const err = document.getElementById('err');
+        err.classList.remove('visible');
+        err.textContent = '';
+        const phone = document.getElementById('phone').value.trim();
+        const password = document.getElementById('pwd').value;
+        try {
+          await DemoApi.login(phone, password);
+          location.href = 'patients.html';
+        } catch (x) {
+          err.textContent = x.message;
+          err.classList.add('visible');
+        }
+      });
+    </script>
+  </body>
+</html>

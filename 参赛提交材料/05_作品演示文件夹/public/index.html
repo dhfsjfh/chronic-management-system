@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>社区慢病管理 — 演示首页</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-logo" aria-hidden="true">医</div>
+          <div>
+            <h1>社区慢性病健康管理系统</h1>
+            <p class="sub">本地化演示 · 医防协同 · 数据可视</p>
+          </div>
+        </div>
+        <a class="btn btn-ghost" href="login.html">进入系统</a>
+      </header>
+
+      <section class="hero-card">
+        <h2 class="hero-title">面向社区的一站式慢病患者管理演示</h2>
+        <p class="hero-desc">
+          适用于课题答辩与短视频录制：一页看清系统边界，三步完成「登录 → 患者 → 数据」闭环展示。
+        </p>
+
+        <div class="grid">
+          <div class="feature-card">
+            <strong>演示登录</strong>
+            <span>内置演示账号，无外部依赖即可体验完整流程。</span>
+          </div>
+          <div class="feature-card">
+            <strong>患者概要</strong>
+            <span>查看虚拟患者基本情况与慢病标签。</span>
+          </div>
+          <div class="feature-card">
+            <strong>指标展示</strong>
+            <span>血压、血糖近期记录表格化呈现，便于口述讲解。</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a class="btn btn-primary" href="login.html">开始演示</a>
+          <a class="btn btn-ghost" href="patients.html">我已登录 · 直接去患者列表</a>
+          <a class="btn btn-ghost" href="overview.html">项目简报（答辩用）</a>
+        </div>
+        <p class="note">提示：请先点击「进入系统」完成登录后再访问患者列表与详情。</p>
+      </section>
+
+      <p class="footer-hint">
+        本地：双击目录内启动脚本（或运行 <code>node server.js</code>），端口默认 8890。<br />
+        在线：<code>Vercel / GitHub Pages</code> 部署说明见仓库 <strong>DEPLOY.md</strong>
+      </p>
+    </div>
+  </body>
+</html>

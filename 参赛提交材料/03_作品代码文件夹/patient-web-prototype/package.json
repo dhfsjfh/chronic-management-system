@@ -1,0 +1,15 @@
+{
+  "name": "community-cdm",
+  "version": "2.0.0",
+  "description": "社区慢病管理系统 - 2026中国大学生计算机设计大赛参赛作品",
+  "main": "src/api/server.js",
+  "scripts": {
+    "start": "node src/api/server.js",
+    "dev": "node src/api/server.js"
+  },
+  "keywords": ["慢性病管理", "健康管理", "人工智能"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

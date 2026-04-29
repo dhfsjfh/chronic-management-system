@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>社区慢病管理系统 - 官网展示版</title>
+  <style>
+    :root {
+      --bg: #07101d;
+      --bg-soft: #0d1830;
+      --panel: rgba(255, 255, 255, 0.07);
+      --panel-strong: rgba(255, 255, 255, 0.12);
+      --panel-solid: #0f1d35;
+      --text: #f5f9ff;
+      --muted: rgba(245, 249, 255, 0.74);
+      --primary: #78c4ff;
+      --primary-strong: #4ea9ff;
+      --accent: #86f2cb;
+      --accent-soft: rgba(134, 242, 203, 0.16);
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(52, 152, 219, 0.3), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(134, 242, 203, 0.12), transparent 18%),
+        linear-gradient(180deg, #0b1730 0%, #07101d 38%, #09131f 100%);
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 72px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      width: 38px;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4ea9ff, #86f2cb);
+      color: #041121;
+      font-weight: 800;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .nav a {
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .nav a:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      padding: 54px 48px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(29, 72, 135, 0.78), rgba(13, 27, 54, 0.94)),
+        radial-gradient(circle at 80% 20%, rgba(134, 242, 203, 0.12), transparent 28%);
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -80px auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(126, 240, 194, 0.24), transparent 64%);
+    }
+
+    .kicker {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--primary);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 54px;
+      line-height: 1.15;
+    }
+
+    .hero-copy p {
+      max-width: 760px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.85;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #52b6ff, #7ef0c2);
+      color: #041121;
+    }
+
+    .btn-secondary {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    .hero-meta,
+    .hero-stats,
+    .showcase-grid,
+    .feature-grid,
+    .value-grid,
+    .roadmap,
+    .footer-bar {
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-meta {
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 28px;
+    }
+
+    .hero-panel {
+      align-self: stretch;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .hero-panel-title {
+      margin-bottom: 16px;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .mock-screen {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 22px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #f8fbff, #eef5ff);
+      color: #16263c;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+    }
+
+    .mock-top {
+      display: flex;
+      justify-content: space-between;
+      padding: 18px 18px 10px;
+      font-size: 12px;
+      color: #6b7a90;
+    }
+
+    .mock-body {
+      padding: 0 18px 18px;
+    }
+
+    .mock-banner {
+      padding: 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #2f80ed, #56ccf2);
+      color: #fff;
+    }
+
+    .mock-banner strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .mock-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .mock-box,
+    .mini-card {
+      padding: 12px;
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(20, 35, 90, 0.08);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .mock-box strong,
+    .mini-card strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #16263c;
+    }
+
+    .mini-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .meta-card,
+    .glass-card,
+    .stat-card,
+    .timeline-item {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .meta-card {
+      padding: 18px;
+    }
+
+    .meta-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .meta-card span {
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .section {
+      margin-top: 24px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.045);
+      box-shadow: var(--shadow);
+    }
+
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+    }
+
+    .section-intro {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .hero-stats {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .showcase-grid {
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+
+    .stat-card {
+      padding: 22px;
+      background: var(--panel-strong);
+    }
+
+    .stat-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 34px;
+      color: #ffffff;
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .feature-grid,
+    .value-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .glass-card {
+      padding: 22px;
+    }
+
+    .glass-card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .glass-card p,
+    .glass-card li {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .glass-card ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .scene-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .roadmap {
+      grid-template-columns: 1fr;
+    }
+
+    .highlight-panel {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04));
+    }
+
+    .highlight-panel h3 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .highlight-panel p,
+    .highlight-panel li {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .highlight-panel ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .number-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .number-row {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .number {
+      display: inline-flex;
+      width: 42px;
+      height: 42px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .number-row strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .number-row span {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 18px;
+      padding: 18px 20px;
+      align-items: start;
+    }
+
+    .timeline-item strong {
+      color: var(--accent);
+      font-size: 15px;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .footer-bar {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      margin-top: 24px;
+      padding: 20px 24px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .footer-bar p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .cta {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #52b6ff, #7ef0c2);
+      color: #051221;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    @media (max-width: 960px) {
+      .hero,
+      .hero-meta,
+      .hero-stats,
+      .showcase-grid,
+      .feature-grid,
+      .value-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .wrap {
+        width: min(100% - 20px, 1180px);
+      }
+
+      .topbar,
+      .hero,
+      .section {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .topbar,
+      .hero-meta,
+      .hero-stats,
+      .showcase-grid,
+      .feature-grid,
+      .value-grid,
+      .footer-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        display: grid;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">慢</span>
+        <span>社区慢病管理系统</span>
+      </div>
+      <nav class="nav">
+        <a href="#highlights">项目亮点</a>
+        <a href="#capabilities">核心能力</a>
+        <a href="#scenes">应用场景</a>
+        <a href="#progress">当前进展</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="kicker">官网展示版 Homepage</span>
+        <h1>让社区慢病管理更连续、更清晰、更可执行</h1>
+        <p>
+          社区慢病管理系统面向社区居民、基层医疗机构与健康管理团队，提供居民端数字化入口、健康资讯服务、
+          打卡记录能力与本地后端联调基础，适合项目汇报、方案展示和后续业务扩展。
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#highlights">查看项目亮点</a>
+          <a class="btn btn-secondary" href="./项目总结网页版.html">查看详细总结</a>
+        </div>
+
+        <div class="hero-meta">
+          <div class="meta-card">
+            <strong>服务对象</strong>
+            <span>高血压、糖尿病等社区慢病人群，以及家庭医生与健康管理人员。</span>
+          </div>
+          <div class="meta-card">
+            <strong>产品形态</strong>
+            <span>微信小程序前端 + Node.js 后端服务 + 本地数据库演示能力。</span>
+          </div>
+          <div class="meta-card">
+            <strong>当前成果</strong>
+            <span>首页主链路已完成，可展示资讯、打卡、用户信息和健康概览。</span>
+          </div>
+          <div class="meta-card">
+            <strong>演示状态</strong>
+            <span>前后端链路已打通，核心接口已完成联调与验证。</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="hero-panel">
+        <div class="hero-panel-title">产品展示视图</div>
+        <div class="mock-screen">
+          <div class="mock-top">
+            <span>社区慢病管理</span>
+            <span>演示版</span>
+          </div>
+          <div class="mock-body">
+            <div class="mock-banner">
+              <strong>您好，张阿姨</strong>
+              <span>今日健康概览与慢病服务入口已准备就绪</span>
+            </div>
+            <div class="mock-grid">
+              <div class="mock-box"><strong>今日打卡</strong><span>已完成</span></div>
+              <div class="mock-box"><strong>健康资讯</strong><span>8 条内容</span></div>
+              <div class="mock-box"><strong>消息提醒</strong><span>2 条未读</span></div>
+            </div>
+            <div class="mini-stack">
+              <div class="mini-card"><strong>血压</strong><span>126/82，状态正常</span></div>
+              <div class="mini-card"><strong>血糖</strong><span>5.8，建议持续监测</span></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section" id="highlights">
+      <h2>项目亮点</h2>
+      <p class="section-intro">
+        本系统聚焦“易用、连续、可执行”的社区慢病管理需求，强调居民端低门槛使用体验与服务端数据联动能力，适合方案展示、业务汇报与项目演示。
+      </p>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <strong>6</strong>
+          <span>核心业务 API 已就绪，覆盖首页、资讯、用户、打卡等主要场景。</span>
+        </div>
+        <div class="stat-card">
+          <strong>100%</strong>
+          <span>首页主链路已打通，可从页面请求到后端服务返回完成整体验证。</span>
+        </div>
+        <div class="stat-card">
+          <strong>8</strong>
+          <span>内置健康资讯演示数据，可支持公开演示中的内容展示。</span>
+        </div>
+        <div class="stat-card">
+          <strong>1</strong>
+          <span>居民端首页已形成可运行样板，可作为后续多页面扩展起点。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="showcase-grid">
+        <div class="highlight-panel">
+          <h3>一页展示项目全貌</h3>
+          <p>
+            当前官网展示版适合直接用于路演、汇报和对外介绍，通过更强的品牌感和更清晰的信息层级，
+            快速说明项目定位、能力边界和阶段成果。
+          </p>
+          <ul>
+            <li>更像官网首页，而不是项目笔记</li>
+            <li>突出产品价值和对外表达</li>
+            <li>可直接本地打开演示</li>
+          </ul>
+        </div>
+        <div class="number-list">
+          <div class="number-row">
+            <span class="number">01</span>
+            <div>
+              <strong>高保真首屏</strong>
+              <span>加入导航、按钮、展示面板和更清晰的品牌表达，提升观感与演示感。</span>
+            </div>
+          </div>
+          <div class="number-row">
+            <span class="number">02</span>
+            <div>
+              <strong>结构更像官网</strong>
+              <span>从“项目说明”升级为“产品展示”，更适合外部交流和方案介绍。</span>
+            </div>
+          </div>
+          <div class="number-row">
+            <span class="number">03</span>
+            <div>
+              <strong>保留详细页跳转</strong>
+              <span>展示版和详细总结版分层组织，兼顾视觉效果与完整信息沉淀。</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="capabilities">
+      <h2>核心能力</h2>
+      <p class="section-intro">
+        公开版页面聚焦产品价值传达，展示当前系统已经形成的关键能力模块与可落地的服务场景。
+      </p>
+      <div class="feature-grid">
+        <div class="glass-card">
+          <h3>居民首页入口</h3>
+          <p>提供欢迎区、消息入口、轮播信息、功能宫格和快捷服务，形成居民端统一入口。</p>
+        </div>
+        <div class="glass-card">
+          <h3>健康资讯服务</h3>
+          <p>支持资讯分页、关键字搜索与内容浏览，适用于健康教育与慢病知识传播。</p>
+        </div>
+        <div class="glass-card">
+          <h3>每日健康打卡</h3>
+          <p>支持今日打卡状态展示与一键打卡，帮助用户形成连续记录习惯。</p>
+        </div>
+        <div class="glass-card">
+          <h3>用户健康画像</h3>
+          <p>提供居民基本信息和慢病标签，便于后续接入个性化建议与分层服务。</p>
+        </div>
+        <div class="glass-card">
+          <h3>本地后端联调</h3>
+          <p>前端已通过 `localhost:3000` 接入后端服务，适合快速演示和迭代开发。</p>
+        </div>
+        <div class="glass-card">
+          <h3>演示容错能力</h3>
+          <p>保留 mock 回退和后端演示容错设计，提升本地演示稳定性。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="scenes">
+      <h2>应用场景</h2>
+      <p class="section-intro">
+        该系统适合社区卫生服务中心、基层健康管理团队、家庭医生签约服务及数字健康项目展示等场景。
+      </p>
+      <div class="scene-list">
+        <span class="pill">社区慢病管理演示</span>
+        <span class="pill">基层医疗信息化方案汇报</span>
+        <span class="pill">家庭医生签约服务支撑</span>
+        <span class="pill">居民端健康管理入口</span>
+        <span class="pill">慢病随访与健康教育</span>
+        <span class="pill">项目投标或路演展示</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>项目价值</h2>
+      <p class="section-intro">
+        相较于单点功能展示，当前版本已具备“页面可见、接口可用、链路可测”的产品原型基础，更适合向外部对象传达项目方向和执行能力。
+      </p>
+      <div class="value-grid">
+        <div class="glass-card">
+          <h3>对居民</h3>
+          <ul>
+            <li>降低健康管理门槛</li>
+            <li>提升每日打卡与记录便利性</li>
+            <li>更容易接收慢病健康教育内容</li>
+          </ul>
+        </div>
+        <div class="glass-card">
+          <h3>对机构</h3>
+          <ul>
+            <li>形成数字化居民服务入口</li>
+            <li>为后续随访、干预和分析打基础</li>
+            <li>支持方案汇报与项目展示</li>
+          </ul>
+        </div>
+        <div class="glass-card">
+          <h3>对项目推进</h3>
+          <ul>
+            <li>已具备从前端到后端的联调样板</li>
+            <li>可继续快速扩展更多业务页面</li>
+            <li>便于后续迁移至测试或正式环境</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="progress">
+      <h2>当前进展</h2>
+      <p class="section-intro">
+        项目已经完成了第一阶段的公开演示所需基础内容，能支撑对外说明“做了什么、现在到了哪一步、接下来怎么扩展”。
+      </p>
+      <div class="roadmap">
+        <div class="timeline-item">
+          <strong>阶段 1</strong>
+          <p>完成小程序首页页面结构、样式、状态管理和本地演示能力建设。</p>
+        </div>
+        <div class="timeline-item">
+          <strong>阶段 2</strong>
+          <p>完成 Node.js + Express 后端服务建设，提供资讯、用户、打卡等接口能力。</p>
+        </div>
+        <div class="timeline-item">
+          <strong>阶段 3</strong>
+          <p>打通前后端联调链路，完成核心接口验证，形成可运行的演示版本。</p>
+        </div>
+        <div class="timeline-item">
+          <strong>下一阶段</strong>
+          <p>继续补齐档案页、消息页、打卡页、AI 咨询和更多居民健康服务能力。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-bar">
+      <p>
+        公开版页面已生成，适合用于项目介绍、汇报展示和方案演示。当前文件为单页静态 HTML，可直接本地打开使用。
+      </p>
+      <a class="cta" href="./项目总结网页版.html">查看详细总结版</a>
+    </div>
+  </div>
+</body>
+</html>

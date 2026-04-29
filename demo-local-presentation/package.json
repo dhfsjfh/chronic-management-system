@@ -1,0 +1,10 @@
+{
+  "name": "slow-disease-local-demo",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

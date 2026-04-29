@@ -1,0 +1,193 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state-card">
+    <view class="state-title">首页加载中</view>
+    <view class="state-desc">正在获取您的健康概览与资讯内容</view>
+  </view>
+
+  <view wx:elif="{{loadError}}" class="state-card">
+    <view class="state-title">加载失败</view>
+    <view class="state-desc">网络异常或服务暂不可用，请稍后重试</view>
+    <button class="primary-button" bindtap="retryLoad">重新加载</button>
+  </view>
+
+  <scroll-view
+    wx:else
+    class="page-scroll"
+    scroll-y="true"
+    enable-back-to-top="true"
+  >
+    <view class="hero-card">
+      <view class="hero-top">
+        <view>
+          <view class="hero-title">{{greeting}}</view>
+          <view class="hero-subtitle">欢迎使用社区慢病管理平台</view>
+        </view>
+        <view class="message-entry" bindtap="goToMessage">
+          <text>消息</text>
+          <view wx:if="{{unreadMessageCount > 0}}" class="message-badge">{{unreadMessageCount}}</view>
+        </view>
+      </view>
+
+      <view class="hero-tags">
+        <view class="tag">适老化首页</view>
+        <view class="tag">{{dataSourceText}}</view>
+        <view wx:if="{{weather}}" class="tag">{{weather.city}} {{weather.temperature}}°C {{weather.condition}}</view>
+      </view>
+    </view>
+
+    <view class="search-card">
+      <input
+        class="search-input"
+        value="{{searchKey}}"
+        placeholder="搜索健康资讯、用药、饮食建议"
+        confirm-type="search"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
+      />
+      <view class="search-actions">
+        <text class="search-link" bindtap="onSearchClear">清空</text>
+        <text class="search-link primary" bindtap="onSearchConfirm">搜索</text>
+      </view>
+      <view wx:if="{{searchHistory.length}}" class="history-wrap">
+        <view class="history-title">最近搜索</view>
+        <view class="history-list">
+          <view
+            wx:for="{{searchHistory}}"
+            wx:key="*this"
+            class="history-item"
+            data-keyword="{{item}}"
+            bindtap="onSearchHistoryTap"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="banner-card">
+      <swiper
+        class="banner-swiper"
+        autoplay="true"
+        circular="true"
+        interval="4000"
+        duration="500"
+        current="{{currentBanner}}"
+        bindchange="onBannerChange"
+      >
+        <swiper-item wx:for="{{bannerList}}" wx:key="id">
+          <view class="banner-item" data-index="{{index}}" bindtap="onBannerTap">
+            <view class="banner-title">{{item.title}}</view>
+            <view class="banner-desc">慢病管理服务与健康教育专区</view>
+          </view>
+        </swiper-item>
+      </swiper>
+      <view class="banner-dots">
+        <view
+          wx:for="{{bannerList}}"
+          wx:key="id"
+          class="banner-dot {{currentBanner === index ? 'banner-dot-active' : ''}}"
+        ></view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">功能入口</view>
+      </view>
+      <view class="menu-grid">
+        <view
+          wx:for="{{menuList}}"
+          wx:key="id"
+          class="menu-item"
+          data-index="{{index}}"
+          bindtap="onMenuTap"
+        >
+          <view class="menu-icon" style="background: {{item.color}};">{{item.iconText}}</view>
+          <view class="menu-title">{{item.title}}</view>
+          <view wx:if="{{item.badge > 0}}" class="menu-badge">{{item.badge}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">快捷服务</view>
+      </view>
+      <view class="quick-grid">
+        <view
+          wx:for="{{quickActions}}"
+          wx:key="id"
+          class="quick-item"
+          data-index="{{index}}"
+          bindtap="onQuickActionTap"
+        >
+          <view class="quick-icon" style="background: {{item.color}};">{{item.iconText}}</view>
+          <view class="quick-title">{{item.title}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">今日打卡</view>
+        <text class="section-link" bindtap="oneKeyCheckin">一键打卡</text>
+      </view>
+      <view wx:if="{{todayCheckin}}" class="checkin-card">
+        <view class="checkin-top">
+          <view class="checkin-date">{{todayCheckin.date}}</view>
+          <view class="checkin-status {{checkinStatusClass}}">
+            {{checkinStatusText}}
+          </view>
+        </view>
+        <view wx:if="{{todayCheckin.checkinTime}}" class="checkin-time">
+          打卡时间：{{todayCheckin.checkinTime}}
+        </view>
+        <view class="metric-grid">
+          <view class="metric-item">
+            <view class="metric-label">血压</view>
+            <view class="metric-value">{{todayCheckin.items.bloodPressure.value}}</view>
+          </view>
+          <view class="metric-item">
+            <view class="metric-label">血糖</view>
+            <view class="metric-value">{{todayCheckin.items.bloodSugar.value}}</view>
+          </view>
+          <view class="metric-item">
+            <view class="metric-label">体重</view>
+            <view class="metric-value">{{todayCheckin.items.weight.value}}</view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="empty-card">今日打卡数据暂未生成</view>
+    </view>
+
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">健康资讯</view>
+        <text class="section-link" bindtap="viewAllNews">查看全部</text>
+      </view>
+      <view wx:if="{{newsList.length === 0}}" class="empty-card">
+        暂无资讯内容
+      </view>
+      <view
+        wx:for="{{newsList}}"
+        wx:key="id"
+        class="news-card"
+        data-index="{{index}}"
+        bindtap="onNewsTap"
+      >
+        <view class="news-cover">{{item.author}}</view>
+        <view class="news-content">
+          <view class="news-title">{{item.title}}</view>
+          <view class="news-summary">{{item.summary}}</view>
+          <view class="news-meta">
+            <text>{{item.publishTime}}</text>
+            <text>{{item.views}}阅读</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{loadingMore}}" class="footer-tip">正在加载更多资讯...</view>
+      <view wx:elif="{{!hasMore && newsList.length > 0}}" class="footer-tip">已加载全部资讯</view>
+    </view>
+  </scroll-view>
+</view>

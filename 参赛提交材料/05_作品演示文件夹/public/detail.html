@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>患者详情 — 社区慢病管理演示</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-logo">医</div>
+          <div>
+            <h1 id="titleName">档案与指标</h1>
+            <p class="sub">近期监测数据（示意）</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <a class="btn btn-ghost" href="patients.html">← 列表</a>
+          <a class="btn btn-ghost" href="overview.html">项目简报</a>
+          <button type="button" class="btn btn-ghost" id="btnOut">退出</button>
+        </div>
+      </header>
+
+      <div class="card" id="overview">
+        <div class="meta-grid" id="meta"></div>
+        <p class="muted" id="remark" style="margin: 0; line-height: 1.6"></p>
+      </div>
+
+      <div class="split">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 1rem">血压记录</h3>
+          <div class="data-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>收缩压</th>
+                  <th>舒张压</th>
+                  <th>提示</th>
+                </tr>
+              </thead>
+              <tbody id="tbp"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 1rem">血糖记录</h3>
+          <div class="data-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>数值</th>
+                  <th>空腹</th>
+                  <th>提示</th>
+                </tr>
+              </thead>
+              <tbody id="tsg"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+      (async function () {
+      if (!DemoApi.requireAuth()) return;
+
+      document.getElementById('btnOut').addEventListener('click', function () {
+        DemoApi.logout();
+      });
+
+      var params = new URLSearchParams(location.search);
+      var pid = parseInt(params.get('id'), 10);
+      if (!pid) pid = 1;
+
+      try {
+        var pData = await DemoApi.fetch('/api/patient/' + pid);
+        var p = pData.patient;
+
+        document.getElementById('titleName').textContent = p.name + ' — 档案与指标';
+
+        document.getElementById('meta').innerHTML =
+          '<div class="meta-item"><div class="k">年龄</div><div class="v">' +
+          p.age +
+          '</div></div>' +
+          '<div class="meta-item"><div class="k">性别</div><div class="v">' +
+          p.gender +
+          '</div></div>' +
+          '<div class="meta-item"><div class="k">最近随访</div><div class="v">' +
+          p.lastVisit +
+          '</div></div>';
+
+        document.getElementById('remark').textContent =
+          '随访备注：' + (p.remark || '—');
+
+        var vData = await DemoApi.fetch('/api/vitals/' + pid);
+
+        document.getElementById('tbp').innerHTML = vData.bp
+          .map(function (r) {
+            return (
+              '<tr><td>' +
+              r.t +
+              '</td><td>' +
+              r.sys +
+              '</td><td>' +
+              r.dia +
+              '</td><td>' +
+              r.tier +
+              '</td></tr>'
+            );
+          })
+          .join('');
+
+        document.getElementById('tsg').innerHTML = vData.sugar
+          .map(function (r) {
+            return (
+              '<tr><td>' +
+              r.t +
+              '</td><td>' +
+              r.value +
+              ' mmol/L</td><td>' +
+              (r.fasting ? '是' : '否') +
+              '</td><td>' +
+              r.tier +
+              '</td></tr>'
+            );
+          })
+          .join('');
+      } catch (e) {
+        document.getElementById('overview').innerHTML =
+          '<p class="empty">' +
+          (e.message || '加载失败') +
+          '</p><p style="text-align:center"><a href="patients.html">返回列表</a></p>';
+        document.querySelector('.split').style.display = 'none';
+      }
+      })();
+    </script>
+  </body>
+</html>

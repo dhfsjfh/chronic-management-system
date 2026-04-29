@@ -1,0 +1,702 @@
+/*
+ * 功能：社区慢病管理系统-组件样式
+ * 用途：正式运行
+ * AI辅助：Cursor生成，已人工理解、修改并优化
+ */
+
+/* ========== 健康指标卡片组件 ========== */
+.health-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+  cursor: default;
+}
+
+.health-card:active {
+  transform: scale(0.97);
+}
+
+.health-card .hc-title {
+  font-size: 14px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.health-card .hc-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+  display: block;
+}
+
+.health-card .hc-unit {
+  font-size: 12px;
+  color: #bbb;
+  display: block;
+  margin-top: 2px;
+}
+
+.health-card .hc-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.health-card-row {
+  display: flex;
+  gap: 8px;
+  margin: 0 16px 12px;
+}
+
+.health-card-row .health-card {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ========== 用户头部 ========== */
+.user-header {
+  display: flex;
+  align-items: center;
+  padding: 20px 16px 16px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+}
+
+.user-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 28px;
+}
+
+.user-info-area {
+  flex: 1;
+  margin-left: 14px;
+}
+
+.user-name {
+  font-size: 20px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.user-cardno {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+/* ========== 健康概览条 ========== */
+.health-overview {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin: -10px 16px 12px;
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 2;
+}
+
+.overview-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.overview-item .ov-label {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.overview-item .ov-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.overview-item .ov-unit {
+  font-size: 12px;
+  color: #bbb;
+  margin-top: 2px;
+}
+
+.overview-divider {
+  width: 1px;
+  height: 40px;
+  background: #f0f0f0;
+}
+
+/* ========== 功能宫格 ========== */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  margin: 0 16px 12px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.menu-item:hover {
+  transform: translateY(-2px);
+}
+
+.menu-item:active {
+  transform: scale(0.95);
+}
+
+.menu-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.menu-text {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ========== 图表卡片 ========== */
+.chart-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin: 0 16px 12px;
+}
+
+.chart-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chart-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.chart-card-more {
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.chart-canvas-wrapper {
+  width: 100%;
+  height: 160px;
+  position: relative;
+}
+
+/* ========== Tab切换 ========== */
+.tab-group {
+  display: flex;
+  gap: 4px;
+  background: #f0f2f5;
+  padding: 3px;
+  border-radius: 8px;
+  width: fit-content;
+  margin: 0 16px 12px;
+}
+
+.tab-item {
+  padding: 6px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.tab-item.active {
+  background: #fff;
+  color: var(--primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ========== 打卡记录列表 ========== */
+.record-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-date {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 80px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.record-values {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.record-value-item {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.record-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  margin-left: 4px;
+}
+
+.record-tag.warn {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.record-tag.good {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* ========== 消息列表 ========== */
+.msg-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.msg-count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.msg-clear-all {
+  font-size: 13px;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.msg-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  margin: 0 16px 8px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.msg-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.msg-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.msg-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.msg-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.msg-title.unread {
+  color: var(--text);
+}
+
+.msg-preview {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.msg-time {
+  font-size: 11px;
+  color: #b0b8c4;
+  margin-top: 6px;
+  display: block;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ========== AI对话 ========== */
+.ai-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg);
+}
+
+.ai-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.chat-message {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+
+.chat-message.user {
+  flex-direction: row-reverse;
+}
+
+.chat-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.chat-avatar.ai {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.chat-avatar.user-ava {
+  background: var(--primary);
+}
+
+.chat-content {
+  max-width: 78%;
+}
+
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.ai .chat-bubble {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px 14px 14px 4px;
+  color: var(--text);
+}
+
+.user .chat-bubble {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 14px 14px 4px 14px;
+}
+
+.chat-time {
+  font-size: 10px;
+  color: #b0b8c4;
+  margin-top: 4px;
+  display: block;
+}
+
+.user .chat-time {
+  text-align: right;
+}
+
+.chat-input-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px 24px;
+  background: #fff;
+  border-top: 1px solid var(--border);
+  align-items: center;
+}
+
+.chat-input-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #dcdfe6;
+  border-radius: 20px;
+  font-size: 15px;
+  background: #f8f9fb;
+  outline: none;
+}
+
+.chat-input-bar input:focus {
+  border-color: var(--primary);
+}
+
+.chat-send-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #dcdfe6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: none;
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.chat-send-btn.active {
+  background: var(--primary);
+}
+
+/* ========== 快捷问题 ========== */
+.quick-questions {
+  margin-bottom: 12px;
+}
+
+.quick-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.question-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.question-item {
+  padding: 8px 16px;
+  border: 1px solid #d0d9f0;
+  border-radius: 18px;
+  font-size: 14px;
+  color: var(--primary);
+  background: #f0f7ff;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.question-item:hover {
+  background: #e3f2fd;
+  border-color: var(--primary);
+}
+
+/* ========== 数据同步 ========== */
+.sync-status-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  margin: 0 16px 12px;
+}
+
+.sync-status-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.sync-status-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  display: block;
+}
+
+.sync-status-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: block;
+}
+
+.sync-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 0 16px 12px;
+}
+
+.sync-stat-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  text-align: center;
+}
+
+.sync-stat-num {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary);
+  display: block;
+}
+
+.sync-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: block;
+}
+
+/* ========== 登录页额外样式 ========== */
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 24px;
+  background: linear-gradient(135deg, var(--primary), #0d47a1);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.login-error {
+  background: #ffebee;
+  color: var(--danger);
+  padding: 10px 16px;
+  border-radius: var(--radius-xs);
+  font-size: 14px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.login-tip {
+  font-size: 13px;
+  color: #999;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.login-tip a {
+  color: var(--primary);
+  cursor: pointer;
+}
+
+/* ========== 资讯卡片 ========== */
+.news-card {
+  margin: 0 16px 12px;
+  background: #fff;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.news-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.news-banner:hover {
+  opacity: 0.9;
+}
+
+/* ========== 健康打卡结果浮层 ========== */
+.checkin-result-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.checkin-result-overlay.show {
+  display: flex;
+}
+
+.checkin-result-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px 24px;
+  width: 80%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: scaleIn 0.25s ease;
+}

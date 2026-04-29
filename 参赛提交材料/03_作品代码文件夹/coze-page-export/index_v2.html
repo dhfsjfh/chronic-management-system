@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社区慢病管理系统 V2 - 智能健康管理平台</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/element-plus@1.1.0-beta.24/dist/index.full.js"></script>
+    <script src="https://unpkg.com/echarts@5.4.1/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus@1.1.0-beta.24/dist/index.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #1890ff; --primary-dark: #096dd9; --primary-light: #40a9ff;
+            --success-color: #52c41a; --warning-color: #faad14; --danger-color: #ff4d4f;
+            --info-color: #909399; --bg-dark: #001529; --bg-light: #f0f2f5;
+            --text-primary: #303133; --text-secondary: #606266; --text-muted: #909399;
+            --border-color: #dcdfe6; --card-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
+        }
+        body { font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif; background: var(--bg-light); min-height: 100vh; }
+        #app { min-height: 100vh; }
+        /* 登录页面 */
+        .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #001529 0%, #003a70 50%, #001529 100%); position: relative; overflow: hidden; }
+        .login-container::before { content: ""; position: absolute; width: 100%; height: 100%; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234189e3' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        .login-card { width: 440px; background: rgba(255,255,255,0.95); border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 50px 40px; position: relative; z-index: 1; }
+        .login-logo { text-align: center; margin-bottom: 40px; }
+        .login-logo h1 { font-size: 26px; color: var(--primary-color); margin-bottom: 8px; font-weight: 600; }
+        .login-logo p { font-size: 14px; color: var(--text-muted); }
+        .login-btn { width: 100%; height: 48px; font-size: 16px; border-radius: 8px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); border: none; }
+        .login-demo { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f2f5; }
+        .login-demo p { font-size: 12px; color: #909399; margin: 4px 0; }
+        /* 主布局 */
+        .main-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #001529 0%, #003a70 100%); position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; transition: all 0.3s; overflow-y: auto; }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        .sidebar-header { height: 80px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo { display: flex; align-items: center; gap: 12px; }
+        .sidebar-logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary-color) 0%, #69b1ff 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .sidebar-logo-text { color: white; font-size: 15px; font-weight: 600; line-height: 1.3; }
+        .sidebar-logo-text small { display: block; font-size: 11px; font-weight: 400; opacity: 0.7; }
+        .sidebar-menu { padding: 16px 0; }
+        .menu-section { padding: 8px 20px; font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-top: 12px; }
+        .menu-item { display: flex; align-items: center; padding: 12px 24px; color: rgba(255,255,255,0.75); cursor: pointer; transition: all 0.3s; border-left: 3px solid transparent; gap: 12px; }
+        .menu-item:hover { background: rgba(24,144,255,0.2); color: white; }
+        .menu-item.active { background: rgba(24,144,255,0.3); color: white; border-left-color: var(--primary-color); }
+        .menu-item .menu-icon { font-size: 18px; width: 24px; text-align: center; }
+        .menu-item .menu-text { font-size: 14px; flex: 1; }
+        .menu-item .menu-badge { background: var(--danger-color); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+        .main-content { flex: 1; margin-left: 260px; background: var(--bg-light); min-height: 100vh; }
+        .header { height: 70px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 50; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .page-tabs { display: flex; gap: 4px; }
+        .page-tab { padding: 8px 16px; border-radius: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+        .page-tab:hover { background: #f5f7fa; }
+        .page-tab.active { background: var(--primary-color); color: white; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .header-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; }
+        .header-icon:hover { background: #f5f7fa; }
+        .user-info { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 6px 12px; border-radius: 8px; transition: all 0.2s; }
+        .user-info:hover { background: #f5f7fa; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color) 0%, #69b1ff 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+        .content-wrapper { padding: 24px 30px; }
+        /* 通用样式 */
+        .dashboard-header { margin-bottom: 24px; }
+        .dashboard-title { font-size: 24px; color: var(--text-primary); font-weight: 600; margin-bottom: 4px; }
+        .dashboard-subtitle { font-size: 14px; color: var(--text-muted); }
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: var(--card-shadow); transition: all 0.3s; position: relative; overflow: hidden; }
+        .stat-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .stat-card.blue::before { background: linear-gradient(90deg, #1890ff, #69b1ff); }
+        .stat-card.green::before { background: linear-gradient(90deg, #52c41a, #73d13d); }
+        .stat-card.orange::before { background: linear-gradient(90deg, #faad14, #ffc53d); }
+        .stat-card.red::before { background: linear-gradient(90deg, #ff4d4f, #ff7875); }
+        .stat-card.purple::before { background: linear-gradient(90deg, #722ed1, #9254de); }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .stat-icon.blue { background: linear-gradient(135deg, #1890ff 0%, #69b1ff 100%); color: white; }
+        .stat-icon.green { background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%); color: white; }
+        .stat-icon.orange { background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%); color: white; }
+        .stat-icon.red { background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%); color: white; }
+        .stat-icon.purple { background: linear-gradient(135deg, #722ed1 0%, #9254de 100%); color: white; }
+        .stat-trend { display: flex; align-items: center; gap: 2px; font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+        .stat-trend.up { background: #f6ffed; color: var(--success-color); }
+        .stat-trend.down { background: #fff2f0; color: var(--danger-color); }
+        .stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+        .stat-value small { font-size: 14px; font-weight: 400; color: var(--text-muted); }
+        .stat-label { font-size: 13px; color: var(--text-muted); }
+        .stat-target { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .stat-target span { color: var(--primary-color); font-weight: 500; }
+        .charts-grid { display: grid; gap: 20px; }
+        .charts-grid.two-col { grid-template-columns: 2fr 1fr; }
+        .charts-grid.half { grid-template-columns: 1fr 1fr; }
+        .charts-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+        .chart-card { background: white; border-radius: 12px; padding: 24px; box-shadow: var(--card-shadow); }
+        .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .chart-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .chart-container { height: 280px; }
+        .chart-container-sm { height: 240px; }
+        .panel { background: white; border-radius: 12px; padding: 24px; box-shadow: var(--card-shadow); margin-bottom: 20px; }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .panel-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        /* 患者卡片 */
+        .patient-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .patient-item { background: white; border-radius: 12px; padding: 20px; box-shadow: var(--card-shadow); transition: all 0.3s; cursor: pointer; border: 1px solid transparent; }
+        .patient-item:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-color: var(--primary-color); }
+        .patient-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .patient-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color) 0%, #69b1ff 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; }
+        .patient-name { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+        .patient-meta { font-size: 13px; color: var(--text-muted); }
+        .patient-tags { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .patient-tags .el-tag { margin-right: 4px; }
+        .patient-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding-top: 16px; border-top: 1px solid #f0f2f5; }
+        .patient-stat { text-align: center; }
+        .patient-stat-value { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+        .patient-stat-value.normal { color: var(--success-color); }
+        .patient-stat-value.warning { color: var(--warning-color); }
+        .patient-stat-value.danger { color: var(--danger-color); }
+        .patient-stat-label { font-size: 11px; color: var(--text-muted); }
+        /* 表格 */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { text-align: left; padding: 12px 16px; background: #fafafa; font-size: 13px; font-weight: 600; color: var(--text-primary); border-bottom: 1px solid #f0f2f5; }
+        .data-table td { padding: 14px 16px; font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid #f0f2f5; }
+        .data-table tr:hover td { background: #fafafa; }
+        /* 指标卡片 */
+        .indicator-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .indicator-card { background: linear-gradient(135deg, #f8fbff 0%, #e6f7ff 100%); border-radius: 12px; padding: 20px; text-align: center; }
+        .indicator-value { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+        .indicator-value.good { color: var(--success-color); }
+        .indicator-value.warning { color: var(--warning-color); }
+        .indicator-value.danger { color: var(--danger-color); }
+        .indicator-label { font-size: 14px; color: var(--text-primary); margin-bottom: 4px; }
+        .indicator-target { font-size: 12px; color: var(--text-muted); }
+        /* 预警列表 */
+        .alert-list { display: flex; flex-direction: column; gap: 12px; }
+        .alert-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: #fafafa; border-radius: 10px; border-left: 3px solid; }
+        .alert-item.warning { border-left-color: var(--warning-color); }
+        .alert-item.danger { border-left-color: var(--danger-color); }
+        .alert-item.info { border-left-color: var(--primary-color); }
+        .alert-item.success { border-left-color: var(--success-color); }
+        .alert-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .alert-item.warning .alert-icon { background: #fffbe6; }
+        .alert-item.danger .alert-icon { background: #fff2f0; }
+        .alert-item.info .alert-icon { background: #e6f7ff; }
+        .alert-item.success .alert-icon { background: #f6ffed; }
+        .alert-content { flex: 1; }
+        .alert-title { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+        .alert-time { font-size: 12px; color: var(--text-muted); }
+        /* 监测卡片 */
+        .monitor-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .monitor-card { background: white; border-radius: 12px; padding: 20px; box-shadow: var(--card-shadow); text-align: center; }
+        .monitor-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 12px; }
+        .monitor-icon.glucose { background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%); }
+        .monitor-icon.bp { background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%); }
+        .monitor-icon.med { background: linear-gradient(135deg, #f6ffed 0%, #b7eb8f 100%); }
+        .monitor-icon.exercise { background: linear-gradient(135deg, #e6f7ff 0%, #91d5ff 100%); }
+        .monitor-icon.device { background: linear-gradient(135deg, #f9f0ff 0%, #d3adf7 100%); }
+        .monitor-value { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .monitor-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .monitor-trend { font-size: 12px; padding: 2px 10px; border-radius: 10px; display: inline-block; }
+        .monitor-trend.good { background: #f6ffed; color: var(--success-color); }
+        .monitor-trend.warning { background: #fffbe6; color: var(--warning-color); }
+        .monitor-trend.danger { background: #fff2f0; color: var(--danger-color); }
+        /* 参考信息 */
+        .reference-info { background: #fafafa; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+        .reference-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+        .reference-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .reference-item { text-align: center; }
+        .reference-item-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .reference-item-value { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        /* 智能体卡片 */
+        .agent-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+        .agent-card { background: white; border-radius: 16px; padding: 28px; box-shadow: var(--card-shadow); border: 1px solid #f0f2f5; transition: all 0.3s; position: relative; overflow: hidden; }
+        .agent-card::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+        .agent-card.nutritionist::after { background: linear-gradient(90deg, #52c41a, #73d13d); }
+        .agent-card.coach::after { background: linear-gradient(90deg, #1890ff, #69b1ff); }
+        .agent-card.monitor::after { background: linear-gradient(90deg, #722ed1, #9254de); }
+        .agent-card.ai::after { background: linear-gradient(90deg, #faad14, #ffc53d); }
+        .agent-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+        .agent-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 20px; }
+        .agent-card.nutritionist .agent-icon { background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%); }
+        .agent-card.coach .agent-icon { background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%); }
+        .agent-card.monitor .agent-icon { background: linear-gradient(135deg, #f9f0ff 0%, #d3adf7 100%); }
+        .agent-card.ai .agent-icon { background: linear-gradient(135deg, #fff7e6 0%, #ffe58f 100%); }
+        .agent-name { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+        .agent-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+        .agent-features { display: flex; flex-wrap: wrap; gap: 8px; }
+        .agent-feature { padding: 4px 12px; background: #f5f7fa; border-radius: 12px; font-size: 12px; color: var(--text-secondary); }
+        .agent-stats { display: flex; gap: 20px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f0f2f5; }
+        .agent-stat-item { text-align: center; }
+        .agent-stat-value { font-size: 20px; font-weight: 600; color: var(--primary-color); }
+        .agent-stat-label { font-size: 11px; color: var(--text-muted); }
+        /* 达标状态 */
+        .target-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .target-status.achieved { background: #f6ffed; color: var(--success-color); }
+        .target-status.warning { background: #fffbe6; color: var(--warning-color); }
+        .target-status.danger { background: #fff2f0; color: var(--danger-color); }
+        /* 用药类型 */
+        .med-type { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .med-type.acei { background: #e6f7ff; color: #1890ff; }
+        .med-type.arb { background: #f6ffed; color: #52c41a; }
+        .med-type.ccb { background: #fff7e6; color: #faad14; }
+        .med-type.diuretic { background: #f9f0ff; color: #722ed1; }
+        .med-type.beta { background: #fff2f0; color: #ff4d4f; }
+        .med-type.metro { background: #f5f5f5; color: #595959; }
+        /* 动画 */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
+        /* 时间线 */
+        .timeline { padding: 20px 0; }
+        .timeline-item { display: flex; gap: 16px; padding-bottom: 24px; position: relative; }
+        .timeline-item:not(:last-child)::before { content: ""; position: absolute; left: 11px; top: 28px; bottom: 0; width: 2px; background: #e4e7ed; }
+        .timeline-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; z-index: 1; }
+        .timeline-dot.blue { background: #1890ff; color: white; }
+        .timeline-dot.green { background: #52c41a; color: white; }
+        .timeline-dot.orange { background: #faad14; color: white; }
+        .timeline-dot.red { background: #ff4d4f; color: white; }
+        .timeline-dot.purple { background: #722ed1; color: white; }
+        .timeline-content { flex: 1; background: #fafafa; padding: 12px 16px; border-radius: 8px; }
+        .timeline-title { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+        .timeline-desc { font-size: 12px; color: var(--text-muted); }
+        .timeline-time { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        /* 设备卡片 */
+        .device-card { background: white; border-radius: 12px; padding: 20px; box-shadow: var(--card-shadow); display: flex; gap: 16px; align-items: center; }
+        .device-icon { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+        .device-icon.bp { background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%); }
+        .device-icon.glucose { background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%); }
+        .device-info { flex: 1; }
+        .device-name { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+        .device-code { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .device-status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+        .device-status.online { background: #f6ffed; color: #52c41a; }
+        .device-status.offline { background: #f5f5f5; color: #909399; }
+        /* AI聊天 */
+        .ai-chat-container { background: white; border-radius: 12px; box-shadow: var(--card-shadow); overflow: hidden; display: flex; flex-direction: column; height: 500px; }
+        .ai-chat-header { padding: 16px 20px; background: linear-gradient(135deg, #1890ff 0%, #69b1ff 100%); color: white; display: flex; align-items: center; gap: 12px; }
+        .ai-chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .ai-message { display: flex; gap: 12px; align-items: flex-start; }
+        .ai-message.user { flex-direction: row-reverse; }
+        .ai-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .ai-avatar.bot { background: linear-gradient(135deg, #1890ff 0%, #69b1ff 100%); color: white; }
+        .ai-avatar.user { background: #f0f2f5; }
+        .ai-bubble { max-width: 70%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+        .ai-message.bot .ai-bubble { background: #f0f2f5; color: var(--text-primary); border-bottom-left-radius: 4px; }
+        .ai-message.user .ai-bubble { background: #1890ff; color: white; border-bottom-right-radius: 4px; }
+        .ai-chat-input { padding: 16px 20px; border-top: 1px solid #f0f2f5; display: flex; gap: 12px; }
+        .ai-chat-input input { flex: 1; padding: 10px 16px; border: 1px solid #dcdfe6; border-radius: 8px; font-size: 14px; outline: none; }
+        .ai-chat-input input:focus { border-color: #1890ff; }
+        /* 标签管理 */
+        .tag-manage-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .tag-manage-item { background: #fafafa; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; }
+        .tag-manage-name { display: flex; align-items: center; gap: 8px; }
+        .tag-color { width: 12px; height: 12px; border-radius: 50%; }
+        /* 问卷 */
+        .questionnaire-item { background: #fafafa; padding: 16px 20px; border-radius: 10px; margin-bottom: 12px; }
+        .questionnaire-title { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 12px; }
+        .questionnaire-options { display: flex; flex-wrap: wrap; gap: 10px; }
+        .questionnaire-option { padding: 8px 16px; background: white; border: 1px solid #dcdfe6; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+        .questionnaire-option:hover { border-color: #1890ff; }
+        .questionnaire-option.selected { background: #e6f7ff; border-color: #1890ff; color: #1890ff; }
+        /* 回访卡片 */
+        .recall-card { background: white; border-radius: 12px; padding: 20px; box-shadow: var(--card-shadow); border-left: 4px solid; }
+        .recall-card.pending { border-left-color: #faad14; }
+        .recall-card.completed { border-left-color: #52c41a; }
+        .recall-card.failed { border-left-color: #ff4d4f; }
+        .recall-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .recall-patient { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .recall-time { font-size: 12px; color: var(--text-muted); }
+        .recall-content { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+        .recall-result { padding: 10px 14px; background: #fafafa; border-radius: 8px; font-size: 13px; }
+        .recall-audio { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #e6f7ff; border-radius: 6px; cursor: pointer; }
+        /* 侧边抽屉 */
+        .drawer-section { margin-bottom: 24px; }
+        .drawer-section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f2f5; }
+        /* 健康计划 */
+        .health-plan-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #fafafa; border-radius: 8px; margin-bottom: 8px; }
+        .health-plan-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .health-plan-info { flex: 1; }
+        .health-plan-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+        .health-plan-desc { font-size: 12px; color: var(--text-muted); }
+        .health-plan-status { padding: 4px 10px; border-radius: 12px; font-size: 11px; }
+        .health-plan-status.active { background: #f6ffed; color: #52c41a; }
+        .health-plan-status.pending { background: #fffbe6; color: #faad14; }
+        /* 异常标注 */
+        .abnormal-mild { background: #fffbe6 !important; color: #faad14 !important; }
+        .abnormal-moderate { background: #fff1f0 !important; color: #ff7875 !important; }
+        .abnormal-severe { background: #ff4d4f !important; color: white !important; }
+        /* 响应式 */
+        @media (max-width: 1400px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } .charts-grid.two-col { grid-template-columns: 1fr; } .monitor-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 1200px) { .patient-list { grid-template-columns: repeat(2, 1fr); } .agent-cards { grid-template-columns: repeat(2, 1fr); } .indicator-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main-content { margin-left: 0; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .patient-list { grid-template-columns: 1fr; } .agent-cards { grid-template-columns: 1fr; } }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- 加载状态 -->
+        <div v-if="loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- 登录页面 -->
+        <div v-if="!isLoggedIn" class="login-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <h1>🏥 社区慢病管理系统 V2</h1>
+                    <p>AI驱动的智能健康管理平台</p>
+                </div>
+                <el-form :model="loginForm" @submit.prevent="handleLogin">
+                    <el-form-item>
+                        <el-input v-model="loginForm.username" placeholder="请输入用户名" size="large" />
+                    </el-form-item>
+                    <el-form-item>
+                        <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" size="large" @keyup.enter="handleLogin" />
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" class="login-btn" @click="handleLogin" :loading="loginLoading">
+                            {{ loginLoading ? '登录中...' : '登 录' }}
+                        </el-button>
+                    </el-form-item>
+                    <div class="login-demo">
+                        <p>👨‍⚕️ 演示账号：admin</p>
+                        <p>🔑 演示密码：admin123</p>
+                    </div>
+                </el-form>
+            </div>
+        </div>
+
+        <!-- 主应用 -->
+        <div v-else class="main-container">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <div class="sidebar-logo-icon">🏥</div>
+                        <div class="sidebar-logo-text">
+                            慢病管理系统
+                            <small>V2 增强版</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-menu">
+                    <div class="menu-section">健康管理</div>
+                    <div v-for="item in mainMenu" :key="item.key" class="menu-item" :class="{ active: currentPage === item.key }" @click="currentPage = item.key">
+                        <span class="menu-icon">{{ item.icon }}</span>
+                        <span class="menu-text">{{ item.name }}</span>
+                        <span v-if="item.badge" class="menu-badge">{{ item.badge }}</span>
+                    </div>
+                    <div class="menu-section">AI智能服务</div>
+                    <div v-for="item in aiMenu" :key="item.key" class="menu-item" :class="{ active: currentPage === item.key }" @click="currentPage = item.key">
+                        <span class="menu-icon">{{ item.icon }}</span>
+                        <span class="menu-text">{{ item.name }}</span>
+                        <span v-if="item.badge" class="menu-badge">{{ item.badge }}</span>
+                    </div>
+                    <div class="menu-section">设备与回访</div>
+                    <div v-for="item in deviceMenu" :key="item.key" class="menu-item" :class="{ active: currentPage === item.key }" @click="currentPage = item.key">
+                        <span class="menu-icon">{{ item.icon }}</span>
+                        <span class="menu-text">{{ item.name }}</span>
+                        <span v-if="item.badge" class="menu-badge">{{ item.badge }}</span>
+                    </div>
+                    <div class="menu-section">系统</div>
+                    <div v-for="item in systemMenu" :key="item.key" class="menu-item" :class="{ active: currentPage === item.key }" @click="currentPage = item.key">
+                        <span class="menu-icon">{{ item.icon }}</span>
+                        <span class="menu-text">{{ item.name }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主内容 -->
+            <div class="main-content">
+                <!-- 头部 -->
+                <div class="header">
+                    <div class="header-left">
+                        <div class="page-tabs">
+                            <div v-for="tab in mainMenu.slice(0, 4)" :key="tab.key" class="page-tab" :class="{ active: currentPage === tab.key }" @click="currentPage = tab.key">
+                                {{ tab.name }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <div class="header-icon" title="消息">🔔</div>
+                        <div class="header-icon" title="帮助">❓</div>
+                        <el-dropdown @command="handleCommand">
+                            <div class="user-info">
+                                <div class="user-avatar">👨‍⚕️</div>
+                                <div>
+                                    <div style="font-size: 14px; color: #303133;">{{ userInfo.name }}</div>
+                                    <div style="font-size: 11px; color: #909399;">{{ userInfo.role }}</div>
+                                </div>
+                            </div>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                                    <el-dropdown-item command="settings">系统设置</el-dropdown-item>
+                                    <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+
+                    <!-- 首页仪表盘 -->
+                    <div v-show="currentPage === 'dashboard'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">健康数据概览</h1>
+                            <p class="dashboard-subtitle">AI驱动的智能健康管理 · 实时监测 · 主动预警</p>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card blue">
+                                <div class="stat-header">
+                                    <div class="stat-icon blue">👥</div>
+                                    <div class="stat-trend up">↑ 12</div>
+                                </div>
+                                <div class="stat-value">1,286</div>
+                                <div class="stat-label">管理患者数</div>
+                            </div>
+                            <div class="stat-card green">
+                                <div class="stat-header">
+                                    <div class="stat-icon green">📊</div>
+                                    <div class="stat-trend up">↑ 5%</div>
+                                </div>
+                                <div class="stat-value">89.2<small>%</small></div>
+                                <div class="stat-label">血糖达标率</div>
+                            </div>
+                            <div class="stat-card orange">
+                                <div class="stat-header">
+                                    <div class="stat-icon orange">💉</div>
+                                    <div class="stat-trend down">↓ 2%</div>
+                                </div>
+                                <div class="stat-value">76.5<small>%</small></div>
+                                <div class="stat-label">用药依从性</div>
+                            </div>
+                            <div class="stat-card purple">
+                                <div class="stat-header">
+                                    <div class="stat-icon purple">📋</div>
+                                    <div class="stat-trend up">↑ 8</div>
+                                </div>
+                                <div class="stat-value">23</div>
+                                <div class="stat-label">待随访患者</div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-header">
+                                    <div class="stat-icon red">🤖</div>
+                                    <div class="stat-trend up">新</div>
+                                </div>
+                                <div class="stat-value">{{ aiStats.calls }}</div>
+                                <div class="stat-label">AI外呼今日</div>
+                            </div>
+                        </div>
+
+                        <div class="charts-grid two-col">
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <span class="chart-title">📈 血糖控制趋势分析</span>
+                                    <el-radio-group v-model="glucosePeriod" size="small">
+                                        <el-radio-button label="week">本周</el-radio-button>
+                                        <el-radio-button label="month">本月</el-radio-button>
+                                    </el-radio-group>
+                                </div>
+                                <div id="glucoseChart" class="chart-container"></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <span class="chart-title">🎯 控制目标达标率</span>
+                                </div>
+                                <div id="targetChart" class="chart-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="charts-grid half" style="margin-top: 20px;">
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <span class="chart-title">🩺 血压分级分布</span>
+                                </div>
+                                <div id="bpChart" class="chart-container-sm"></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <span class="chart-title">👥 患者病情构成</span>
+                                </div>
+                                <div id="conditionChart" class="chart-container-sm"></div>
+                            </div>
+                        </div>
+
+                        <div class="reference-info" style="margin-top: 20px;">
+                            <div class="reference-title">📌 糖尿病诊断标准（依据国家卫健委临床路径）</div>
+                            <div class="reference-grid">
+                                <div class="reference-item">
+                                    <div class="reference-item-label">典型症状+随机血糖</div>
+                                    <div class="reference-item-value">≥11.1 mmol/L</div>
+                                </div>
+                                <div class="reference-item">
+                                    <div class="reference-item-label">空腹血糖（FPG）</div>
+                                    <div class="reference-item-value">≥7.0 mmol/L</div>
+                                </div>
+                                <div class="reference-item">
+                                    <div class="reference-item-label">OGTT 2h血糖</div>
+                                    <div class="reference-item-value">≥11.1 mmol/L</div>
+                                </div>
+                                <div class="reference-item">
+                                    <div class="reference-item-label">糖化血红蛋白（HbA1c）</div>
+                                    <div class="reference-item-value">≥6.5%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="charts-grid half" style="margin-top: 20px;">
+                            <div class="panel">
+                                <div class="panel-header">
+                                    <span class="panel-title">⚠️ 风险预警</span>
+                                    <el-badge :value="warnings.length" type="danger">
+                                        <el-button size="small">查看全部</el-button>
+                                    </el-badge>
+                                </div>
+                                <div class="alert-list">
+                                    <div v-for="w in warnings" :key="w.id" class="alert-item" :class="w.level">
+                                        <div class="alert-icon">{{ w.icon }}</div>
+                                        <div class="alert-content">
+                                            <div class="alert-title">{{ w.title }}</div>
+                                            <div class="alert-time">{{ w.time }} · {{ w.patient }}</div>
+                                        </div>
+                                        <el-button type="primary" text size="small">处理</el-button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel">
+                                <div class="panel-header">
+                                    <span class="panel-title">📅 今日随访计划</span>
+                                    <el-button type="primary" text size="small">查看全部</el-button>
+                                </div>
+                                <div class="alert-list">
+                                    <div v-for="f in followups" :key="f.id" class="alert-item" :class="f.type">
+                                        <div class="alert-icon">{{ f.icon }}</div>
+                                        <div class="alert-content">
+                                            <div class="alert-title">{{ f.patient }} - {{ f.typeLabel }}</div>
+                                            <div class="alert-time">{{ f.time }} · {{ f.item }}</div>
+                                        </div>
+                                        <el-button type="primary" text size="small">执行</el-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 患者管理 - 增强版 -->
+                    <div v-show="currentPage === 'patients'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">患者管理</h1>
+                            <p class="dashboard-subtitle">支持标签管理、多维度筛选、健康档案完整展示</p>
+                        </div>
+
+                        <!-- 标签管理区 -->
+                        <div class="panel" style="margin-bottom: 20px;">
+                            <div class="panel-header">
+                                <span class="panel-title">🏷️ 患者标签管理</span>
+                                <el-button type="primary" size="small" @click="showAddTagDialog = true">+ 新增标签</el-button>
+                            </div>
+                            <div class="tag-manage-grid">
+                                <div v-for="tag in patientTags" :key="tag.id" class="tag-manage-item">
+                                    <div class="tag-manage-name">
+                                        <span class="tag-color" :style="{ background: tag.color }"></span>
+                                        <span>{{ tag.name }}</span>
+                                        <span style="font-size: 11px; color: #909399;">({{ tag.count }})</span>
+                                    </div>
+                                    <el-dropdown @command="(cmd) => handleTagCommand(cmd, tag)">
+                                        <span class="el-dropdown-link">···</span>
+                                        <template #dropdown>
+                                            <el-dropdown-menu>
+                                                <el-dropdown-item command="edit">编辑</el-dropdown-item>
+                                                <el-dropdown-item command="delete">删除</el-dropdown-item>
+                                            </el-dropdown-menu>
+                                        </template>
+                                    </el-dropdown>
+                                </div>
+                            </div>
+                            <div style="margin-top: 16px;">
+                                <span style="font-size: 13px; color: #606266; margin-right: 16px;">批量打标签：</span>
+                                <el-checkbox-group v-model="selectedTags">
+                                    <el-checkbox v-for="tag in patientTags" :key="tag.id" :label="tag.id" style="margin-right: 12px;">
+                                        <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="tag-color" :style="{ background: tag.color, width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block' }"></span>
+                                            {{ tag.name }}
+                                        </span>
+                                    </el-checkbox>
+                                </el-checkbox-group>
+                                <el-button type="primary" size="small" style="margin-left: 16px;" :disabled="selectedTags.length === 0">批量应用</el-button>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-header">
+                                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                    <el-input v-model="searchKeyword" placeholder="搜索患者姓名/手机号" style="width: 260px;" clearable />
+                                    <el-select v-model="filterCondition" placeholder="病情类型" style="width: 160px;" clearable>
+                                        <el-option label="2型糖尿病" value="type2" />
+                                        <el-option label="糖尿病+高血压" value="dm_htn" />
+                                        <el-option label="糖尿病前期" value="pre" />
+                                        <el-option label="高血压" value="htn" />
+                                    </el-select>
+                                    <el-select v-model="filterStatus" placeholder="控制状态" style="width: 140px;" clearable>
+                                        <el-option label="控制良好" value="good" />
+                                        <el-option label="控制一般" value="normal" />
+                                        <el-option label="控制不佳" value="poor" />
+                                    </el-select>
+                                    <el-select v-model="filterTag" placeholder="标签筛选" style="width: 140px;" clearable>
+                                        <el-option v-for="tag in patientTags" :key="tag.id" :label="tag.name" :value="tag.id" />
+                                    </el-select>
+                                </div>
+                                <el-button type="primary" @click="dialogVisible = true">+ 新增患者</el-button>
+                            </div>
+
+                            <div class="patient-list">
+                                <div v-for="p in filteredPatients" :key="p.id" class="patient-item" @click="viewPatient(p)">
+                                    <div class="patient-header">
+                                        <div class="patient-avatar">{{ p.avatar }}</div>
+                                        <div>
+                                            <div class="patient-name">{{ p.name }}
+                                                <el-tooltip v-if="p.deviceBound" content="已绑定智能设备" placement="top">
+                                                    <span style="font-size: 12px; color: #52c41a; margin-left: 4px;">📱</span>
+                                                </el-tooltip>
+                                            </div>
+                                            <div class="patient-meta">{{ p.age }}岁 · {{ p.gender }} · {{ p.phone }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="patient-tags">
+                                        <el-tag size="small" :type="getTagType(p.condition)" :color="getTagBg(p.condition) + '20'" :style="{ borderColor: getTagBg(p.condition) }">
+                                            {{ p.condition }}
+                                        </el-tag>
+                                        <el-tag v-for="ptag in p.tags" :key="ptag.id" size="small" :color="ptag.color + '20'" :style="{ borderColor: ptag.color, color: ptag.color }">
+                                            {{ ptag.name }}
+                                        </el-tag>
+                                        <el-tag size="small" type="info">{{ p.duration }}</el-tag>
+                                        <el-tag size="small" :type="getStatusType(p.status)">{{ p.status }}</el-tag>
+                                    </div>
+                                    <div class="patient-stats">
+                                        <div class="patient-stat">
+                                            <div class="patient-stat-value" :class="getGlucoseClass(p.glucose)">{{ p.glucose }}</div>
+                                            <div class="patient-stat-label">空腹血糖</div>
+                                        </div>
+                                        <div class="patient-stat">
+                                            <div class="patient-stat-value" :class="getHbA1cClass(p.hbA1c)">{{ p.hbA1c }}%</div>
+                                            <div class="patient-stat-label">HbA1c</div>
+                                        </div>
+                                        <div class="patient-stat">
+                                            <div class="patient-stat-value" :class="getBPClass(p.sbp)">{{ p.bp }}</div>
+                                            <div class="patient-stat-label">血压</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 24px;">
+                                <el-pagination v-model:current-page="currentPageNum" :page-size="9" :total="50" layout="prev, pager, next" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 设备管理 -->
+                    <div v-show="currentPage === 'devices'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">设备对接管理</h1>
+                            <p class="dashboard-subtitle">智能设备绑定、数据自动采集、实时同步展示</p>
+                        </div>
+
+                        <div class="stats-grid" style="margin-bottom: 24px;">
+                            <div class="stat-card blue">
+                                <div class="stat-header">
+                                    <div class="stat-icon blue">📱</div>
+                                </div>
+                                <div class="stat-value">{{ devices.length }}</div>
+                                <div class="stat-label">设备总数</div>
+                            </div>
+                            <div class="stat-card green">
+                                <div class="stat-header">
+                                    <div class="stat-icon green">✓</div>
+                                </div>
+                                <div class="stat-value">{{ devices.filter(d => d.status === 'online').length }}</div>
+                                <div class="stat-label">在线设备</div>
+                            </div>
+                            <div class="stat-card orange">
+                                <div class="stat-header">
+                                    <div class="stat-icon orange">⏳</div>
+                                </div>
+                                <div class="stat-value">{{ devices.filter(d => d.status === 'binding').length }}</div>
+                                <div class="stat-label">绑定中</div>
+                            </div>
+                            <div class="stat-card purple">
+                                <div class="stat-header">
+                                    <div class="stat-icon purple">📊</div>
+                                </div>
+                                <div class="stat-value">{{ deviceDataToday }}</div>
+                                <div class="stat-label">今日数据采集</div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-header">
+                                    <div class="stat-icon red">⚠️</div>
+                                </div>
+                                <div class="stat-value">{{ abnormalCount }}</div>
+                                <div class="stat-label">异常预警</div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="panel-title">📱 设备列表</span>
+                                <el-button type="primary" @click="showAddDeviceDialog = true">+ 添加设备</el-button>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                                <div v-for="device in devices" :key="device.id" class="device-card">
+                                    <div class="device-icon" :class="device.type">
+                                        {{ device.type === 'bp' ? '🫀' : '🩸' }}
+                                    </div>
+                                    <div class="device-info">
+                                        <div class="device-name">{{ device.name }}</div>
+                                        <div class="device-code">编码：{{ device.code }}</div>
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                            <span class="device-status" :class="device.status === 'online' ? 'online' : 'offline'">
+                                                {{ device.status === 'online' ? '● 在线' : device.status === 'binding' ? '○ 绑定中' : '○ 离线' }}
+                                            </span>
+                                            <span v-if="device.patient" style="font-size: 12px; color: #606266;">绑定：{{ device.patient }}</span>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <el-button size="small" :type="device.patient ? 'default' : 'primary'" @click="bindDevice(device)">
+                                            {{ device.patient ? '解绑' : '绑定' }}
+                                        </el-button>
+                                        <el-button size="small" type="info" @click="viewDeviceData(device)">数据</el-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header">
+                                <span class="panel-title">📊 数据流向可视化</span>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: center; padding: 30px; background: #fafafa; border-radius: 12px;">
+                                <div style="display: flex; align-items: center; gap: 40px;">
+                                    <div style="text-align: center;">
+                                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #fff7e6, #ffd591); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 8px;">🫀</div>
+                                        <div style="font-size: 14px; font-weight: 500;">智能血压计</div>
+                                        <div style="font-size: 11px; color: #909399;">设备端采集</div>
+                                    </div>
+                                    <div style="font-size: 24px; color: #1890ff;">→</div>
+                                    <div style="text-align: center;">
+                                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #e6f7ff, #91d5ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 8px;">📡</div>
+                                        <div style="font-size: 14px; font-weight: 500;">数据中台</div>
+                                        <div style="font-size: 11px; color: #909399;">自动同步</div>
+                                    </div>
+                                    <div style="font-size: 24px; color: #1890ff;">→</div>
+                                    <div style="text-align: center;">
+                                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #f6ffed, #b7eb8f); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 8px;">👨‍⚕️</div>
+                                        <div style="font-size: 14px; font-weight: 500;">医生管理端</div>
+                                        <div style="font-size: 11px; color: #909399;">实时查看</div>
+                                    </div>
+                                    <div style="font-size: 24px; color: #1890ff;">→</div>
+                                    <div style="text-align: center;">
+                                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #f9f0ff, #d3adf7); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 8px;">🤖</div>
+                                        <div style="font-size: 14px; font-weight: 500;">AI分析</div>
+                                        <div style="font-size: 11px; color: #909399;">智能预警</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header">
+                                <span class="panel-title">📋 设备数据记录</span>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>患者</th>
+                                        <th>设备</th>
+                                        <th>血压</th>
+                                        <th>心率</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="record in deviceRecords" :key="record.id">
+                                        <td>{{ record.time }}</td>
+                                        <td>{{ record.patient }}</td>
+                                        <td>{{ record.device }}</td>
+                                        <td :class="getBPClass(record.sbp)">{{ record.bp }} mmHg</td>
+                                        <td>{{ record.hr }} 次/分</td>
+                                        <td>
+                                            <span v-if="record.abnormal" class="target-status" :class="record.abnormalLevel === 'mild' ? 'warning' : record.abnormalLevel === 'moderate' ? 'danger' : 'danger'">
+                                                {{ record.abnormalLevel === 'mild' ? '轻度异常' : record.abnormalLevel === 'moderate' ? '中度异常' : '重度异常' }}
+                                            </span>
+                                            <span v-else class="target-status achieved">正常</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- AI助手 -->
+                    <div v-show="currentPage === 'aiassistant'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">AI健康助手</h1>
+                            <p class="dashboard-subtitle">智能对话、健康咨询、预约挂号、数据上传</p>
+                        </div>
+
+                        <div class="agent-cards">
+                            <div class="agent-card ai">
+                                <div class="agent-icon">🤖</div>
+                                <div class="agent-name">AI健康助手</div>
+                                <div class="agent-desc">24小时在线，解答健康问题，提供用药指导，智能分诊建议。</div>
+                                <div class="agent-features">
+                                    <span class="agent-feature">语音输入</span>
+                                    <span class="agent-feature">智能问答</span>
+                                    <span class="agent-feature">用药提醒</span>
+                                </div>
+                            </div>
+                            <div class="agent-card ai">
+                                <div class="agent-icon">📋</div>
+                                <div class="agent-name">预约挂号助手</div>
+                                <div class="agent-desc">智能推荐科室，预约挂号，排队提醒，行程规划。</div>
+                                <div class="agent-features">
+                                    <span class="agent-feature">科室推荐</span>
+                                    <span class="agent-feature">智能预约</span>
+                                    <span class="agent-feature">提醒通知</span>
+                                </div>
+                            </div>
+                            <div class="agent-card ai">
+                                <div class="agent-icon">📊</div>
+                                <div class="agent-name">健康数据分析师</div>
+                                <div class="agent-desc">分析健康趋势，生成报告，预测风险，提供个性化建议。</div>
+                                <div class="agent-features">
+                                    <span class="agent-feature">趋势分析</span>
+                                    <span class="agent-feature">报告生成</span>
+                                    <span class="agent-feature">风险预测</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="panel-title">💬 AI智能对话</span>
+                                <div style="display: flex; gap: 12px;">
+                                    <el-select v-model="aiSelectedPatient" placeholder="选择患者" style="width: 180px;">
+                                        <el-option v-for="p in patients" :key="p.id" :label="p.name" :value="p.id" />
+                                    </el-select>
+                                </div>
+                            </div>
+                            <div class="ai-chat-container">
+                                <div class="ai-chat-header">
+                                    <span style="font-size: 24px;">🤖</span>
+                                    <div>
+                                        <div style="font-weight: 600;">AI健康助手</div>
+                                        <div style="font-size: 12px; opacity: 0.8;">在线 · 随时为您服务</div>
+                                    </div>
+                                </div>
+                                <div class="ai-chat-messages" ref="chatMessages">
+                                    <div v-for="msg in aiMessages" :key="msg.id" class="ai-message" :class="msg.type">
+                                        <div class="ai-avatar" :class="msg.type === 'bot' ? 'bot' : 'user'">
+                                            {{ msg.type === 'bot' ? '🤖' : '👤' }}
+                                        </div>
+                                        <div class="ai-bubble">{{ msg.content }}</div>
+                                    </div>
+                                </div>
+                                <div class="ai-chat-input">
+                                    <input v-model="aiInput" placeholder="输入您的问题..." @keyup.enter="sendAiMessage" />
+                                    <el-button type="primary" @click="sendAiMessage">发送</el-button>
+                                    <el-button @click="toggleVoiceInput">
+                                        🎤 {{ voiceInputActive ? '关闭' : '语音' }}
+                                    </el-button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="charts-grid half" style="margin-top: 20px;">
+                            <div class="panel">
+                                <div class="panel-header">
+                                    <span class="panel-title">📤 上传健康指标</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                    <div>
+                                        <label style="font-size: 13px; color: #606266; margin-bottom: 8px; display: block;">空腹血糖 (mmol/L)</label>
+                                        <el-input-number v-model="aiGlucose.fasting" :min="1" :max="30" :step="0.1" style="width: 100%;" />
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 13px; color: #606266; margin-bottom: 8px; display: block;">餐后血糖 (mmol/L)</label>
+                                        <el-input-number v-model="aiGlucose.postprandial" :min="1" :max="30" :step="0.1" style="width: 100%;" />
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 13px; color: #606266; margin-bottom: 8px; display: block;">收缩压 (mmHg)</label>
+                                        <el-input-number v-model="aiBP.sbp" :min="60" :max="200" style="width: 100%;" />
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 13px; color: #606266; margin-bottom: 8px; display: block;">舒张压 (mmHg)</label>
+                                        <el-input-number v-model="aiBP.dbp" :min="40" :max="130" style="width: 100%;" />
+                                    </div>
+                                </div>
+                                <el-button type="primary" style="margin-top: 16px; width: 100%;" @click="uploadHealthData">上传数据并分析</el-button>
+                            </div>
+                            <div class="panel">
+                                <div class="panel-header">
+                                    <span class="panel-title">🏥 医院信息查询</span>
+                                </div>
+                                <el-input v-model="hospitalSearch" placeholder="搜索医院名称" style="margin-bottom: 12px;">
+                                    <template #prefix>
+                                        <span>🔍</span>
+                                    </template>
+                                </el-input>
+                                <div v-for="hospital in hospitals" :key="hospital.id" style="padding: 12px; background: #fafafa; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-size: 14px; font-weight: 500; color: #303133;">{{ hospital.name }}</div>
+                                        <div style="font-size: 12px; color: #909399;">{{ hospital.dept }} · 距离 {{ hospital.distance }}</div>
+                                    </div>
+                                    <el-button size="small" type="primary" @click="bookAppointment(hospital)">预约</el-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 中医体质辨识 -->
+                    <div v-show="currentPage === 'tcm'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">中医体质辨识</h1>
+                            <p class="dashboard-subtitle">基于《中医体质分类与判定》标准，AI智能分析体质特点</p>
+                        </div>
+
+                        <div class="charts-grid half">
+                            <div class="panel">
+                                <div class="panel-header">
+                                    <span class="panel-title">📝 体质问卷调查</span>
+                                    <el-progress :percentage="questionnaireProgress" style="width: 200px;" />
+                                </div>
+                                <div v-if="!questionnaireCompleted">
+                                    <div v-for="(q, index) in tcmQuestions" :key="q.id" class="questionnaire-item" v-show="currentQuestion === index">
+                                        <div class="questionnaire-title">{{ q.id }}. {{ q.title }}</div>
+                                        <div class="questionnaire-options">
+                                            <div v-for="opt in q.options" :key="opt.value" class="questionnaire-option" :class="{ selected: q.selected === opt.value }" @click="selectTcmOption(q, opt.value)">
+                                                {{ opt.label }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                                        <el-button v-if="currentQuestion > 0" @click="prevQuestion">上一题</el-button>
+                                        <el-button type="primary" v-if="currentQuestion < tcmQuestions.length - 1" @click="nextQuestion">下一题</el-button>
+                                        <el-button type="success" v-else @click="submitTcmQuestionnaire">提交问卷</el-button>
+                                    </div>
+                                </div>
+                                <div v-else style="text-align: center; padding: 40px;">
+                                    <div style="font-size: 48px; margin-bottom: 16px;">🏆</div>
+                                    <div style="font-size: 18px; font-weight: 600; color: #303133; margin-bottom: 8px;">问卷已完成</div>
+                                    <div style="font-size: 13px; color: #909399;">感谢您的参与，点击下方查看分析结果</div>
+                                    <el-button type="primary" style="margin-top: 20px;" @click="showTcmResult = true">查看体质分析</el-button>
+                                    <el-button style="margin-top: 20px; margin-left: 12px;" @click="resetTcmQuestionnaire">重新测评</el-button>
+                                </div>
+                            </div>
+
+                            <div class="panel">
+                                <div class="panel-header">
+                                    <span class="panel-title">📊 体质分布统计</span>
+                                </div>
+                                <div id="tcmDistChart" class="chart-container-sm"></div>
+                                <div style="margin-top: 20px;">
+                                    <div v-for="type in tcmTypes" :key="type.name" style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                        <div style="width: 80px; font-size: 12px; color: #606266;">{{ type.name }}</div>
+                                        <el-progress :percentage="type.value" :stroke-width="12" :color="type.color" style="flex: 1;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel" style="margin-top: 20px;" v-if="tcmResult">
+                            <div class="panel-header">
+                                <span class="panel-title">🔍 您的体质分析结果</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                                <div style="background: linear-gradient(135deg, #f6ffed, #d9f7be); padding: 24px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 36px; margin-bottom: 12px;">🧘</div>
+                                    <div style="font-size: 18px; font-weight: 600; color: #52c41a; margin-bottom: 8px;">{{ tcmResult.type }}</div>
+                                    <div style="font-size: 24px; font-weight: 700; color: #389e0d;">{{ tcmResult.score }}分</div>
+                                </div>
+                                <div style="grid-column: span 2; padding: 20px;">
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 8px;">📌 体质特点</div>
+                                        <div style="font-size: 13px; color: #606266; line-height: 1.8;">{{ tcmResult.characteristics }}</div>
+                                    </div>
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 8px;">💊 调养方式</div>
+                                        <div style="font-size: 13px; color: #606266; line-height: 1.8;">{{ tcmResult.regimen }}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 8px;">🥗 饮食建议</div>
+                                        <div style="font-size: 13px; color: #606266; line-height: 1.8;">{{ tcmResult.diet }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 主动健康管理 -->
+                    <div v-show="currentPage === 'healthplan'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">主动健康管理</h1>
+                            <p class="dashboard-subtitle">AI个性化健康计划 · 异常指标智能标注 · 关注等级分析</p>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="panel-title">📊 患者健康概览</span>
+                                <el-select v-model="healthPlanPatient" placeholder="选择患者" style="width: 200px;">
+                                    <el-option v-for="p in patients" :key="p.id" :label="p.name" :value="p.id" />
+                                </el-select>
+                            </div>
+                            <div class="indicator-grid">
+                                <div class="indicator-card">
+                                    <div class="indicator-value" :class="getGlucoseClass(healthIndicators.glucose)">{{ healthIndicators.glucose }}</div>
+                                    <div class="indicator-label">空腹血糖 (mmol/L)</div>
+                                    <span v-if="healthIndicators.glucose > 7" class="target-status" :class="healthIndicators.glucose < 10 ? 'warning' : 'danger'">
+                                        {{ healthIndicators.glucose < 10 ? '轻度异常' : '重度异常' }}
+                                    </span>
+                                    <span v-else class="target-status achieved">正常</span>
+                                </div>
+                                <div class="indicator-card">
+                                    <div class="indicator-value" :class="getHbA1cClass(healthIndicators.hbA1c)">{{ healthIndicators.hbA1c }}%</div>
+                                    <div class="indicator-label">HbA1c 糖化血红蛋白</div>
+                                    <span v-if="healthIndicators.hbA1c > 6.5" class="target-status" :class="healthIndicators.hbA1c < 8 ? 'warning' : 'danger'">
+                                        {{ healthIndicators.hbA1c < 8 ? '轻度异常' : '重度异常' }}
+                                    </span>
+                                    <span v-else class="target-status achieved">正常</span>
+                                </div>
+                                <div class="indicator-card">
+                                    <div class="indicator-value" :class="getBPClass(healthIndicators.sbp)">{{ healthIndicators.bp }}</div>
+                                    <div class="indicator-label">血压 (mmHg)</div>
+                                    <span v-if="healthIndicators.sbp > 140" class="target-status" :class="healthIndicators.sbp < 160 ? 'warning' : 'danger'">
+                                        {{ healthIndicators.sbp < 160 ? '中度异常' : '重度异常' }}
+                                    </span>
+                                    <span v-else class="target-status achieved">正常</span>
+                                </div>
+                            </div>
+                            <div style="margin-top: 20px;">
+                                <el-alert :title="'关注等级：' + careLevel.label" :type="careLevel.type" :description="careLevel.desc" show-icon />
+                            </div>
+                        </div>
+
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header">
+                                <span class="panel-title">📋 个性化健康计划</span>
+                                <el-button type="primary" size="small" @click="generateHealthPlan">🤖 AI生成计划</el-button>
+                            </div>
+                            <div>
+                                <div v-for="plan in healthPlans" :key="plan.id" class="health-plan-item">
+                                    <div class="health-plan-icon" :style="{ background: plan.color + '20', color: plan.color }">{{ plan.icon }}</div>
+                                    <div class="health-plan-info">
+                                        <div class="health-plan-name">{{ plan.name }}</div>
+                                        <div class="health-plan-desc">{{ plan.desc }}</div>
+                                    </div>
+                                    <span class="health-plan-status" :class="plan.status">{{ plan.status === 'active' ? '进行中' : '待开始' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header">
+                                <span class="panel-title">⚠️ 异常指标预警</span>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>指标名称</th>
+                                        <th>检测值</th>
+                                        <th>参考范围</th>
+                                        <th>异常程度</th>
+                                        <th>建议措施</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="alert in healthAlerts" :key="alert.id" :class="alert.level === 'mild' ? 'abnormal-mild' : alert.level === 'moderate' ? 'abnormal-moderate' : 'abnormal-severe'">
+                                        <td>{{ alert.name }}</td>
+                                        <td><strong>{{ alert.value }}</strong></td>
+                                        <td>{{ alert.range }}</td>
+                                        <td>
+                                            <el-tag :type="alert.level === 'mild' ? 'warning' : alert.level === 'moderate' ? 'danger' : 'danger'" size="small">
+                                                {{ alert.level === 'mild' ? '轻度' : alert.level === 'moderate' ? '中度' : '重度' }}
+                                            </el-tag>
+                                        </td>
+                                        <td>{{ alert.suggestion }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 慢病回访管理 -->
+                    <div v-show="currentPage === 'recall'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">慢病回访管理</h1>
+                            <p class="dashboard-subtitle">智能回访策略 · 自动任务生成 · AI外呼支持</p>
+                        </div>
+
+                        <div class="stats-grid" style="margin-bottom: 24px;">
+                            <div class="stat-card blue">
+                                <div class="stat-header"><div class="stat-icon blue">📋</div></div>
+                                <div class="stat-value">{{ recallTasks.length }}</div>
+                                <div class="stat-label">待回访任务</div>
+                            </div>
+                            <div class="stat-card green">
+                                <div class="stat-header"><div class="stat-icon green">✓</div></div>
+                                <div class="stat-value">{{ completedRecalls }}</div>
+                                <div class="stat-label">已完成</div>
+                            </div>
+                            <div class="stat-card orange">
+                                <div class="stat-header"><div class="stat-icon orange">🤖</div></div>
+                                <div class="stat-value">{{ aiCallTasks.length }}</div>
+                                <div class="stat-label">AI外呼任务</div>
+                            </div>
+                            <div class="stat-card red">
+                                <div class="stat-header"><div class="stat-icon red">⚠️</div></div>
+                                <div class="stat-value">{{ failedRecalls }}</div>
+                                <div class="stat-label">需人工跟进</div>
+                            </div>
+                        </div>
+
+                        <el-tabs v-model="recallTab">
+                            <el-tab-pane label="回访策略" name="strategy">
+                                <div class="panel">
+                                    <div class="panel-header">
+                                        <span class="panel-title">⚙️ 回访策略配置</span>
+                                        <el-button type="primary" size="small" @click="showAddStrategyDialog = true">+ 新增策略</el-button>
+                                    </div>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>策略名称</th>
+                                                <th>触发条件</th>
+                                                <th>自动操作</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="strategy in recallStrategies" :key="strategy.id">
+                                                <td>{{ strategy.name }}</td>
+                                                <td>
+                                                    <el-tag size="small" type="info" style="margin-right: 4px;" v-for="tag in strategy.conditions" :key="tag">{{ tag }}</el-tag>
+                                                </td>
+                                                <td>
+                                                    <el-tag size="small" style="margin-right: 4px;" v-for="action in strategy.actions" :key="action">{{ action }}</el-tag>
+                                                </td>
+                                                <td>
+                                                    <el-switch v-model="strategy.enabled" size="small" />
+                                                </td>
+                                                <td>
+                                                    <el-button type="primary" text size="small">编辑</el-button>
+                                                    <el-button type="danger" text size="small">删除</el-button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </el-tab-pane>
+                            <el-tab-pane label="回访任务" name="tasks">
+                                <div class="panel">
+                                    <div class="panel-header">
+                                        <span class="panel-title">📋 自动生成回访任务</span>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+                                        <div v-for="task in recallTasks" :key="task.id" class="recall-card" :class="task.status">
+                                            <div class="recall-header">
+                                                <div class="recall-patient">{{ task.patient }}</div>
+                                                <el-tag size="small" :type="task.priority === 'high' ? 'danger' : task.priority === 'medium' ? 'warning' : 'info'">
+                                                    {{ task.priority === 'high' ? '紧急' : task.priority === 'medium' ? '一般' : '低' }}
+                                                </el-tag>
+                                            </div>
+                                            <div class="recall-content">{{ task.reason }}</div>
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div class="recall-time">{{ task.time }}</div>
+                                                <el-button type="primary" size="small" @click="executeRecall(task)">执行回访</el-button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </el-tab-pane>
+                            <el-tab-pane label="AI外呼" name="aicall">
+                                <div class="panel">
+                                    <div class="panel-header">
+                                        <span class="panel-title">🤖 AI外呼回访记录</span>
+                                        <el-button type="primary" size="small">+ 新建外呼任务</el-button>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                                        <div v-for="call in aiCallRecords" :key="call.id" class="recall-card" :class="call.result === 'success' ? 'completed' : call.result === 'failed' ? 'failed' : 'pending'">
+                                            <div class="recall-header">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <span style="font-size: 20px;">🤖</span>
+                                                    <div class="recall-patient">{{ call.patient }}</div>
+                                                </div>
+                                                <el-tag size="small" :type="call.result === 'success' ? 'success' : call.result === 'failed' ? 'danger' : 'warning'">
+                                                    {{ call.result === 'success' ? '已接通' : call.result === 'failed' ? '未接通' : '进行中' }}
+                                                </el-tag>
+                                            </div>
+                                            <div class="recall-content">{{ call.content }}</div>
+                                            <div class="recall-result">
+                                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                                    <span style="font-size: 12px; color: #909399;">通话时长：{{ call.duration }}</span>
+                                                    <span style="font-size: 12px; color: #909399;">{{ call.time }}</span>
+                                                </div>
+                                                <div v-if="call.analysis" style="font-size: 13px; color: #303133;">
+                                                    <strong>AI分析：</strong>{{ call.analysis }}
+                                                </div>
+                                                <div v-if="call.needHuman" style="margin-top: 8px; color: #ff4d4f; font-size: 12px;">
+                                                    ⚠️ 需要人工二次回访
+                                                </div>
+                                            </div>
+                                            <div style="margin-top: 12px;">
+                                                <div class="recall-audio" @click="playRecording(call)">
+                                                    <span>▶️</span>
+                                                    <el-slider v-model="call.playProgress" :show-tooltip="false" style="flex: 1;" />
+                                                    <span style="font-size: 11px;">{{ call.duration }}</span>
+                                                </div>
+                                            </div>
+                                            <div style="margin-top: 12px;">
+                                                <el-button type="text" size="small" @click="viewChatLog(call)">📝 查看聊天记录</el-button>
+                                                <el-button type="text" size="small" @click="exportCallRecord(call)">📥 导出</el-button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </el-tab-pane>
+                        </el-tabs>
+                    </div>
+
+                    <!-- 患者移动端模拟 -->
+                    <div v-show="currentPage === 'patientmobile'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">患者移动端模拟</h1>
+                            <p class="dashboard-subtitle">模拟患者端界面展示 - 查看档案、上传数据、健康打卡</p>
+                        </div>
+
+                        <div style="display: flex; justify-content: center; gap: 40px;">
+                            <div style="width: 375px; background: #f5f5f5; border-radius: 40px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                                <div style="background: white; border-radius: 32px; overflow: hidden; min-height: 700px; position: relative;">
+                                    <!-- 手机顶部 -->
+                                    <div style="height: 44px; background: #001529; display: flex; align-items: center; justify-content: center; position: relative;">
+                                        <div style="width: 150px; height: 28px; background: #001529; border-radius: 20px; position: absolute; bottom: 8px;"></div>
+                                        <div style="color: white; font-size: 12px; font-weight: 600; z-index: 1;">9:41</div>
+                                    </div>
+                                    <!-- 状态栏 -->
+                                    <div style="padding: 12px 16px; background: #001529; display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: white; font-size: 11px;">📶</span>
+                                        <span style="color: white; font-size: 11px;">5G</span>
+                                        <span style="color: white; font-size: 11px; margin-left: auto;">🔋</span>
+                                    </div>
+                                    <!-- 患者端内容 -->
+                                    <div style="padding: 16px;">
+                                        <div style="text-align: center; margin-bottom: 20px;">
+                                            <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #1890ff, #69b1ff); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 36px; color: white;">👨</div>
+                                            <div style="font-size: 18px; font-weight: 600; color: #303133;">王建国</div>
+                                            <div style="font-size: 12px; color: #909399; margin-top: 4px;">2型糖尿病 · 患病5年</div>
+                                            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 8px;">
+                                                <el-tag size="small" type="success">控制一般</el-tag>
+                                                <el-tag size="small" type="info">已签约</el-tag>
+                                            </div>
+                                        </div>
+
+                                        <div style="background: linear-gradient(135deg, #e6f7ff, #bae7ff); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                                            <div style="font-size: 14px; font-weight: 600; color: #1890ff; margin-bottom: 12px;">📊 今日健康指标</div>
+                                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
+                                                <div>
+                                                    <div style="font-size: 20px; font-weight: 700; color: #52c41a;">6.5</div>
+                                                    <div style="font-size: 11px; color: #909399;">空腹血糖</div>
+                                                </div>
+                                                <div>
+                                                    <div style="font-size: 20px; font-weight: 700; color: #1890ff;">8.2</div>
+                                                    <div style="font-size: 11px; color: #909399;">餐后血糖</div>
+                                                </div>
+                                                <div>
+                                                    <div style="font-size: 20px; font-weight: 700; color: #faad14;">128</div>
+                                                    <div style="font-size: 11px; color: #909399;">血压</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="margin-bottom: 16px;">
+                                            <div style="font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 12px;">🩺 健康档案</div>
+                                            <div style="background: #fafafa; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                                                <div style="font-size: 12px; color: #606266; margin-bottom: 4px;">现病史</div>
+                                                <div style="font-size: 13px; color: #303133;">2型糖尿病，血糖控制一般，伴有高血压</div>
+                                            </div>
+                                            <div style="background: #fafafa; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                                                <div style="font-size: 12px; color: #606266; margin-bottom: 4px;">家族史</div>
+                                                <div style="font-size: 13px; color: #303133;">父亲有糖尿病史，母亲有高血压史</div>
+                                            </div>
+                                            <div style="background: #fafafa; padding: 12px; border-radius: 8px;">
+                                                <div style="font-size: 12px; color: #606266; margin-bottom: 4px;">基本信息</div>
+                                                <div style="font-size: 13px; color: #303133;">68岁，男，身高170cm，体重75kg</div>
+                                            </div>
+                                        </div>
+
+                                        <div style="margin-bottom: 16px;">
+                                            <div style="font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 12px;">📤 上传数据</div>
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                                <div style="background: #fff1f0; padding: 16px; border-radius: 10px; text-align: center; cursor: pointer;">
+                                                    <div style="font-size: 28px; margin-bottom: 8px;">🩸</div>
+                                                    <div style="font-size: 13px; font-weight: 500; color: #cf1322;">上传血糖</div>
+                                                </div>
+                                                <div style="background: #fff7e6; padding: 16px; border-radius: 10px; text-align: center; cursor: pointer;">
+                                                    <div style="font-size: 28px; margin-bottom: 8px;">🫀</div>
+                                                    <div style="font-size: 13px; font-weight: 500; color: #d48806;">上传血压</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div style="font-size: 14px; font-weight: 600; color: #303133; margin-bottom: 12px;">📋 健康打卡</div>
+                                            <div style="display: flex; justify-content: space-between; background: #f6ffed; padding: 16px; border-radius: 10px;">
+                                                <div style="text-align: center;">
+                                                    <div style="font-size: 24px; margin-bottom: 4px;">💊</div>
+                                                    <div style="font-size: 11px; color: #52c41a;">已服药</div>
+                                                </div>
+                                                <div style="text-align: center;">
+                                                    <div style="font-size: 24px; margin-bottom: 4px;">🏃</div>
+                                                    <div style="font-size: 11px; color: #52c41a;">已运动</div>
+                                                </div>
+                                                <div style="text-align: center;">
+                                                    <div style="font-size: 24px; margin-bottom: 4px;">🥗</div>
+                                                    <div style="font-size: 11px; color: #52c41a;">已打卡</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 底部导航 -->
+                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #f0f2f5;">
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 20px;">🏠</div>
+                                            <div style="font-size: 10px; color: #1890ff;">首页</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 20px;">📊</div>
+                                            <div style="font-size: 10px; color: #909399;">数据</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 20px;">📋</div>
+                                            <div style="font-size: 10px; color: #909399;">记录</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 20px;">👨‍⚕️</div>
+                                            <div style="font-size: 10px; color: #909399;">医生</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="flex: 1; max-width: 600px;">
+                                <div class="panel">
+                                    <div class="panel-header">
+                                        <span class="panel-title">📱 移动端功能说明</span>
+                                    </div>
+                                    <div class="alert-list">
+                                        <div class="alert-item info">
+                                            <div class="alert-icon">👤</div>
+                                            <div class="alert-content">
+                                                <div class="alert-title">个人健康档案</div>
+                                                <div class="alert-time">患者可查看完整的健康档案，包括现病史、家族史、基本信息、过敏史等</div>
+                                            </div>
+                                        </div>
+                                        <div class="alert-item success">
+                                            <div class="alert-icon">📤</div>
+                                            <div class="alert-content">
+                                                <div class="alert-title">数据自主上传</div>
+                                                <div class="alert-time">患者可在家通过移动端自主上传血压、血糖等健康数据，自动同步至管理端</div>
+                                            </div>
+                                        </div>
+                                        <div class="alert-item warning">
+                                            <div class="alert-icon">📱</div>
+                                            <div class="alert-content">
+                                                <div class="alert-title">设备数据同步</div>
+                                                <div class="alert-time">绑定智能设备后，测量数据自动上传，无需手动记录</div>
+                                            </div>
+                                        </div>
+                                        <div class="alert-item info">
+                                            <div class="alert-icon">💊</div>
+                                            <div class="alert-content">
+                                                <div class="alert-title">用药打卡</div>
+                                                <div class="alert-time">每日用药提醒，服药后可一键打卡，数据同步至管理端</div>
+                                            </div>
+                                        </div>
+                                        <div class="alert-item success">
+                                            <div class="alert-icon">🤝</div>
+                                            <div class="alert-content">
+                                                <div class="alert-title">家庭医生签约</div>
+                                                <div class="alert-time">支持在线签约家庭医生服务，获取持续健康管理</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 血糖监测（保留原功能） -->
+                    <div v-show="currentPage === 'glucose'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">血糖监测</h1>
+                            <p class="dashboard-subtitle">记录血糖数据，分析血糖趋势，对比控制目标</p>
+                        </div>
+
+                        <div class="monitor-grid">
+                            <div class="monitor-card">
+                                <div class="monitor-icon glucose">🩸</div>
+                                <div class="monitor-value">{{ currentGlucose.fasting }}</div>
+                                <div class="monitor-label">空腹血糖 (mmol/L)</div>
+                                <div class="monitor-trend" :class="getGlucoseStatus(currentGlucose.fasting)">{{ getGlucoseStatusText(currentGlucose.fasting) }}</div>
+                            </div>
+                            <div class="monitor-card">
+                                <div class="monitor-icon glucose">🍽️</div>
+                                <div class="monitor-value">{{ currentGlucose.postprandial }}</div>
+                                <div class="monitor-label">餐后2h血糖 (mmol/L)</div>
+                                <div class="monitor-trend" :class="getGlucoseStatus(currentGlucose.postprandial)">{{ getGlucoseStatusText(currentGlucose.postprandial) }}</div>
+                            </div>
+                            <div class="monitor-card">
+                                <div class="monitor-icon glucose">📊</div>
+                                <div class="monitor-value">{{ currentGlucose.hbA1c }}%</div>
+                                <div class="monitor-label">糖化血红蛋白 HbA1c</div>
+                                <div class="monitor-trend" :class="getHbA1cStatus(currentGlucose.hbA1c)">{{ getHbA1cStatusText(currentGlucose.hbA1c) }}</div>
+                            </div>
+                            <div class="monitor-card">
+                                <div class="monitor-icon glucose">📈</div>
+                                <div class="monitor-value">{{ currentGlucose.达标率 }}%</div>
+                                <div class="monitor-label">近7天达标率</div>
+                                <div class="monitor-trend good">✓ 达标</div>
+                            </div>
+                        </div>
+
+                        <div class="charts-grid half" style="margin-top: 20px;">
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <span class="chart-title">血糖趋势图</span>
+                                    <el-radio-group v-model="glucosePeriod" size="small">
+                                        <el-radio-button label="week">7天</el-radio-button>
+                                        <el-radio-button label="month">30天</el-radio-button>
+                                    </el-radio-group>
+                                </div>
+                                <div id="glucoseTrendChart" class="chart-container"></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <span class="chart-title">HbA1c 历史趋势</span>
+                                </div>
+                                <div id="hbA1cChart" class="chart-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header">
+                                <span class="panel-title">📋 血糖记录</span>
+                                <el-button type="primary" @click="showAddGlucoseDialog = true">+ 记录血糖</el-button>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>记录时间</th>
+                                        <th>空腹血糖</th>
+                                        <th>餐后2h血糖</th>
+                                        <th>测量时间点</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="record in glucoseRecords" :key="record.id">
+                                        <td>{{ record.time }}</td>
+                                        <td :class="getGlucoseClass(record.fasting)">{{ record.fasting }} mmol/L</td>
+                                        <td :class="getGlucoseClass(record.postprandial)">{{ record.postprandial }} mmol/L</td>
+                                        <td>{{ record.type }}</td>
+                                        <td><span class="target-status" :class="record.statusClass">{{ record.status }}</span></td>
+                                        <td><el-button type="primary" text size="small">详情</el-button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 血压管理（保留） -->
+                    <div v-show="currentPage === 'bloodpressure'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">血压管理</h1>
+                            <p class="dashboard-subtitle">监测血压变化，自动评估分级，制定降压方案</p>
+                        </div>
+                        <div class="indicator-grid">
+                            <div class="indicator-card">
+                                <div class="indicator-value" :class="getBPClass(currentBP.sbp)">{{ currentBP.bp }}</div>
+                                <div class="indicator-label">当前血压</div>
+                                <div class="indicator-target">当前分级：{{ currentBP.level }}</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="indicator-value" :class="getBPTargetClass(currentBP.sbp)">{{ currentBP.target }}</div>
+                                <div class="indicator-label">降压目标</div>
+                                <div class="indicator-target">依据年龄和并发症</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="indicator-value good">{{ currentBP.达标率 }}%</div>
+                                <div class="indicator-label">达标率</div>
+                                <div class="indicator-target">近30天</div>
+                            </div>
+                        </div>
+                        <div class="charts-grid half" style="margin-top: 20px;">
+                            <div class="chart-card">
+                                <div class="chart-header"><span class="chart-title">血压趋势图</span></div>
+                                <div id="bpTrendChart" class="chart-container"></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-header"><span class="chart-title">血压达标分布</span></div>
+                                <div id="bpAchievementChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 营养管理（保留） -->
+                    <div v-show="currentPage === 'nutrition'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">营养师智能体</h1>
+                            <p class="dashboard-subtitle">AI智能分析饮食，提供个性化营养建议和食谱推荐</p>
+                        </div>
+                        <div class="agent-cards">
+                            <div class="agent-card nutritionist">
+                                <div class="agent-icon">🥗</div>
+                                <div class="agent-name">营养师智能体</div>
+                                <div class="agent-desc">通过图像识别技术分析患者饮食照片，自动计算营养摄入。</div>
+                                <div class="agent-features"><span class="agent-feature">饮食分析</span><span class="agent-feature">营养计算</span><span class="agent-feature">食谱推荐</span></div>
+                            </div>
+                            <div class="agent-card coach">
+                                <div class="agent-icon">🏃</div>
+                                <div class="agent-name">运动教练智能体</div>
+                                <div class="agent-desc">根据患者身体状况和运动能力，制定个性化运动计划。</div>
+                                <div class="agent-features"><span class="agent-feature">运动计划</span><span class="agent-feature">强度调整</span><span class="agent-feature">效果评估</span></div>
+                            </div>
+                            <div class="agent-card monitor">
+                                <div class="agent-icon">📋</div>
+                                <div class="agent-name">监督员智能体</div>
+                                <div class="agent-desc">持续监测患者依从性，及时发送提醒通知。</div>
+                                <div class="agent-features"><span class="agent-feature">依从性监测</span><span class="agent-feature">智能提醒</span><span class="agent-feature">预警推送</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用药管理（保留） -->
+                    <div v-show="currentPage === 'medication'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">用药管理</h1>
+                            <p class="dashboard-subtitle">记录用药方案，设置提醒时间，追踪用药依从性</p>
+                        </div>
+                        <div class="monitor-grid">
+                            <div class="monitor-card">
+                                <div class="monitor-icon med">💊</div>
+                                <div class="monitor-value">{{ medicationStats.依从率 }}%</div>
+                                <div class="monitor-label">用药依从率</div>
+                                <div class="monitor-trend" :class="medicationStats.依从率 >= 80 ? 'good' : 'warning'">{{ medicationStats.依从率 >= 80 ? '达标' : '需提升' }}</div>
+                            </div>
+                            <div class="monitor-card">
+                                <div class="monitor-icon med">📅</div>
+                                <div class="monitor-value">{{ medicationStats.待服药 }}</div>
+                                <div class="monitor-label">今日待服药</div>
+                                <div class="monitor-trend info">按时提醒</div>
+                            </div>
+                            <div class="monitor-card">
+                                <div class="monitor-icon med">✓</div>
+                                <div class="monitor-value">{{ medicationStats.已服药 }}</div>
+                                <div class="monitor-label">今日已服药</div>
+                                <div class="monitor-trend good">完成</div>
+                            </div>
+                            <div class="monitor-card">
+                                <div class="monitor-icon med">⏰</div>
+                                <div class="monitor-value">{{ medicationStats.漏服 }}</div>
+                                <div class="monitor-label">本周漏服次数</div>
+                                <div class="monitor-trend" :class="medicationStats.漏服 > 3 ? 'danger' : 'warning'">{{ medicationStats.漏服 > 3 ? '注意' : '正常' }}</div>
+                            </div>
+                        </div>
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header"><span class="panel-title">💊 当前用药方案</span><el-button type="primary">+ 添加药物</el-button></div>
+                            <table class="data-table">
+                                <thead><tr><th>药物名称</th><th>药物类型</th><th>剂量</th><th>用法</th><th>用药时间</th><th>依从性</th><th>操作</th></tr></thead>
+                                <tbody>
+                                    <tr v-for="med in medications" :key="med.id">
+                                        <td style="font-weight: 500;">{{ med.name }}</td>
+                                        <td><span class="med-type" :class="med.typeClass">{{ med.type }}</span></td>
+                                        <td>{{ med.dose }}</td>
+                                        <td>{{ med.usage }}</td>
+                                        <td>{{ med.time }}</td>
+                                        <td><el-progress :percentage="med.compliance" :color="med.compliance >= 80 ? '#52c41a' : '#faad14'" style="width: 100px;" /></td>
+                                        <td><el-button type="primary" text size="small">编辑</el-button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 随访管理（保留） -->
+                    <div v-show="currentPage === 'followup'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">随访管理</h1>
+                            <p class="dashboard-subtitle">制定随访计划，跟踪检查项目，评估管理效果</p>
+                        </div>
+                        <div class="charts-grid half">
+                            <div class="chart-card">
+                                <div class="chart-header"><span class="chart-title">📊 随访计划执行情况</span></div>
+                                <div id="followupChart" class="chart-container"></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-header"><span class="chart-title">📋 检查项目完成率</span></div>
+                                <div id="checkupChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header"><span class="panel-title">📅 本月随访计划</span><el-button type="primary">+ 新建随访</el-button></div>
+                            <table class="data-table">
+                                <thead><tr><th>患者姓名</th><th>随访类型</th><th>计划日期</th><th>检查项目</th><th>完成状态</th><th>操作</th></tr></thead>
+                                <tbody>
+                                    <tr v-for="f in followupList" :key="f.id">
+                                        <td style="font-weight: 500;">{{ f.patient }}</td>
+                                        <td>{{ f.type }}</td>
+                                        <td>{{ f.date }}</td>
+                                        <td>{{ f.items }}</td>
+                                        <td><el-tag :type="f.status === '已完成' ? 'success' : f.status === '进行中' ? 'warning' : 'info'" size="small">{{ f.status }}</el-tag></td>
+                                        <td><el-button type="primary" text size="small">执行</el-button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 健康报告（保留） -->
+                    <div v-show="currentPage === 'report'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">AI健康报告</h1>
+                            <p class="dashboard-subtitle">智能生成个性化健康管理报告</p>
+                        </div>
+                        <div class="indicator-grid">
+                            <div class="indicator-card">
+                                <div class="indicator-value good">85</div>
+                                <div class="indicator-label">综合健康评分</div>
+                                <div class="indicator-target">优于85%的患者</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="indicator-value warning">72</div>
+                                <div class="indicator-label">血糖控制评分</div>
+                                <div class="indicator-target">需加强管理</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="indicator-value good">90</div>
+                                <div class="indicator-label">用药依从评分</div>
+                                <div class="indicator-target">表现优秀</div>
+                            </div>
+                        </div>
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header">
+                                <span class="panel-title">📋 健康管理建议</span>
+                                <el-button type="primary">🤖 AI生成报告</el-button>
+                            </div>
+                            <div class="alert-list">
+                                <div class="alert-item info"><div class="alert-icon">📊</div><div class="alert-content"><div class="alert-title">加强血糖监测</div><div class="alert-time">建议增加餐后血糖监测频率</div></div></div>
+                                <div class="alert-item success"><div class="alert-icon">🥗</div><div class="alert-content"><div class="alert-title">调整饮食结构</div><div class="alert-time">减少精制碳水化合物摄入</div></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 系统设置（保留） -->
+                    <div v-show="currentPage === 'settings'" class="fade-in">
+                        <div class="dashboard-header">
+                            <h1 class="dashboard-title">系统设置</h1>
+                            <p class="dashboard-subtitle">配置系统参数，管理智能体服务</p>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header"><span class="panel-title">🔔 通知设置</span></div>
+                            <div style="display: grid; gap: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #fafafa; border-radius: 8px;">
+                                    <div><div style="font-size: 14px; font-weight: 500;">用药提醒</div><div style="font-size: 12px; color: #909399;">每日定时提醒患者服药</div></div>
+                                    <el-switch v-model="notifySettings.medicine" />
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #fafafa; border-radius: 8px;">
+                                    <div><div style="font-size: 14px; font-weight: 500;">血糖预警</div><div style="font-size: 12px; color: #909399;">血糖异常时自动提醒</div></div>
+                                    <el-switch v-model="notifySettings.glucose" />
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #fafafa; border-radius: 8px;">
+                                    <div><div style="font-size: 14px; font-weight: 500;">AI外呼</div><div style="font-size: 12px; color: #909399;">启用AI自动回访功能</div></div>
+                                    <el-switch v-model="notifySettings.aiCall" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel" style="margin-top: 20px;">
+                            <div class="panel-header"><span class="panel-title">⚠️ 预警阈值设置</span></div>
+                            <el-form label-width="140px" style="max-width: 600px;">
+                                <el-form-item label="血糖上限"><el-input-number v-model="thresholds.glucoseMax" :min="0" :max="30" :step="0.1" /><span style="margin-left: 8px; color: #909399;">mmol/L</span></el-form-item>
+                                <el-form-item label="血糖下限"><el-input-number v-model="thresholds.glucoseMin" :min="0" :max="10" :step="0.1" /><span style="margin-left: 8px; color: #909399;">mmol/L</span></el-form-item>
+                                <el-form-item label="血压上限（收缩压）"><el-input-number v-model="thresholds.bpMax" :min="100" :max="200" /><span style="margin-left: 8px; color: #909399;">mmHg</span></el-form-item>
+                                <el-form-item><el-button type="primary" @click="saveThresholds">保存设置</el-button></el-form-item>
+                            </el-form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 患者详情抽屉 - 增强版 -->
+        <el-drawer v-model="patientDrawerVisible" title="患者详情" size="60%" direction="rtl">
+            <div v-if="currentPatient" style="padding: 0 20px;">
+                <div style="display: flex; gap: 20px; margin-bottom: 24px; align-items: center;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #1890ff 0%, #69b1ff 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 36px;">{{ currentPatient.avatar }}</div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 20px; font-weight: 600; color: #303133; margin-bottom: 4px;">{{ currentPatient.name }}</div>
+                        <div style="color: #606266; margin-bottom: 8px;">{{ currentPatient.age }}岁 · {{ currentPatient.gender }} · {{ currentPatient.phone }}</div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <el-tag type="primary">{{ currentPatient.condition }}</el-tag>
+                            <el-tag v-for="ptag in currentPatient.tags" :key="ptag.id" :color="ptag.color + '20'" :style="{ borderColor: ptag.color, color: ptag.color }">{{ ptag.name }}</el-tag>
+                            <el-tag :type="currentPatient.deviceBound ? 'success' : 'info'">{{ currentPatient.deviceBound ? '📱 已绑定设备' : '未绑定设备' }}</el-tag>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <el-button type="primary" size="small">✉️ 发送消息</el-button>
+                        <el-button size="small">📋 服务开单</el-button>
+                        <el-button size="small">🤝 家庭医生签约</el-button>
+                    </div>
+                </div>
+
+                <el-tabs>
+                    <el-tab-pane label="健康数据">
+                        <div class="indicator-grid" style="margin-bottom: 20px;">
+                            <div class="indicator-card">
+                                <div class="indicator-value" :class="getGlucoseClass(currentPatient.glucose)">{{ currentPatient.glucose }}</div>
+                                <div class="indicator-label">空腹血糖 (mmol/L)</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="indicator-value" :class="getHbA1cClass(currentPatient.hbA1c)">{{ currentPatient.hbA1c }}%</div>
+                                <div class="indicator-label">HbA1c 糖化血红蛋白</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="indicator-value" :class="getBPClass(currentPatient.sbp)">{{ currentPatient.bp }}</div>
+                                <div class="indicator-label">血压 (mmHg)</div>
+                            </div>
+                        </div>
+                        <div id="patientGlucoseChart" class="chart-container"></div>
+                    </el-tab-pane>
+                    <el-tab-pane label="健康计划">
+                        <div v-for="plan in patientHealthPlans" :key="plan.id" class="health-plan-item">
+                            <div class="health-plan-icon" :style="{ background: plan.color + '20', color: plan.color }">{{ plan.icon }}</div>
+                            <div class="health-plan-info">
+                                <div class="health-plan-name">{{ plan.name }}</div>
+                                <div class="health-plan-desc">{{ plan.desc }}</div>
+                            </div>
+                            <span class="health-plan-status" :class="plan.status">{{ plan.status === 'active' ? '进行中' : '待开始' }}</span>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="指标记录">
+                        <table class="data-table">
+                            <thead><tr><th>时间</th><th>空腹血糖</th><th>餐后血糖</th><th>血压</th><th>状态</th></tr></thead>
+                            <tbody>
+                                <tr v-for="record in patientRecords" :key="record.id">
+                                    <td>{{ record.time }}</td>
+                                    <td :class="getGlucoseClass(record.glucose)">{{ record.glucose }}</td>
+                                    <td :class="getGlucoseClass(record.postprandial)">{{ record.postprandial }}</td>
+                                    <td :class="getBPClass(record.sbp)">{{ record.bp }}</td>
+                                    <td><span class="target-status" :class="record.statusClass">{{ record.status }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </el-tab-pane>
+                    <el-tab-pane label="评估记录">
+                        <div class="timeline">
+                            <div v-for="eval in patientEvaluations" :key="eval.id" class="timeline-item">
+                                <div class="timeline-dot" :class="eval.type">{{ eval.icon }}</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">{{ eval.title }}</div>
+                                    <div class="timeline-desc">{{ eval.desc }}</div>
+                                    <div class="timeline-time">{{ eval.time }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="随访情况">
+                        <div class="timeline">
+                            <div v-for="visit in patientVisits" :key="visit.id" class="timeline-item">
+                                <div class="timeline-dot" :class="visit.type">{{ visit.icon }}</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">{{ visit.title }}</div>
+                                    <div class="timeline-desc">{{ visit.desc }}</div>
+                                    <div class="timeline-time">{{ visit.time }} · {{ visit.doctor }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="轨迹记录">
+                        <div class="timeline">
+                            <div v-for="track in patientTracks" :key="track.id" class="timeline-item">
+                                <div class="timeline-dot" :class="track.type">{{ track.icon }}</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">{{ track.title }}</div>
+                                    <div class="timeline-desc">{{ track.desc }}</div>
+                                    <div class="timeline-time">{{ track.time }} · {{ track.operator }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </div>
+        </el-drawer>
+
+        <!-- 新增患者弹窗 -->
+        <el-dialog v-model="dialogVisible" title="新增患者" width="600px">
+            <el-form :model="newPatientForm" label-width="100px">
+                <el-form-item label="患者姓名"><el-input v-model="newPatientForm.name" /></el-form-item>
+                <el-form-item label="性别"><el-radio-group v-model="newPatientForm.gender"><el-radio label="男">男</el-radio><el-radio label="女">女</el-radio></el-radio-group></el-form-item>
+                <el-form-item label="年龄"><el-input-number v-model="newPatientForm.age" :min="1" :max="120" /></el-form-item>
+                <el-form-item label="手机号"><el-input v-model="newPatientForm.phone" /></el-form-item>
+                <el-form-item label="病情类型"><el-select v-model="newPatientForm.condition" placeholder="请选择"><el-option label="2型糖尿病" value="2型糖尿病" /><el-option label="糖尿病+高血压" value="糖尿病+高血压" /><el-option label="高血压" value="高血压" /><el-option label="糖尿病前期" value="糖尿病前期" /></el-select></el-form-item>
+                <el-form-item label="患者标签">
+                    <el-checkbox-group v-model="newPatientForm.tags">
+                        <el-checkbox v-for="tag in patientTags" :key="tag.id" :label="tag.id">{{ tag.name }}</el-checkbox>
+                    </el-checkbox-group>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button @click="dialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="addPatient">确定</el-button>
+            </template>
+        </el-dialog>
+
+        <!-- 新增标签弹窗 -->
+        <el-dialog v-model="showAddTagDialog" title="新增标签" width="400px">
+            <el-form :model="newTagForm" label-width="80px">
+                <el-form-item label="标签名称"><el-input v-model="newTagForm.name" /></el-form-item>
+                <el-form-item label="标签颜色"><el-color-picker v-model="newTagForm.color" /></el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button @click="showAddTagDialog = false">取消</el-button>
+                <el-button type="primary" @click="addTag">确定</el-button>
+            </template>
+        </el-dialog>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, computed, onMounted, nextTick, watch } = Vue;
+        
+        const app = createApp({
+            setup() {
+                const loading = ref(true);
+                const isLoggedIn = ref(false);
+                const loginLoading = ref(false);
+                const currentPage = ref('dashboard');
+                const glucosePeriod = ref('week');
+                const showAddGlucoseDialog = ref(false);
+                const dialogVisible = ref(false);
+                const patientDrawerVisible = ref(false);
+                const currentPatient = ref(null);
+                const currentPageNum = ref(1);
+                const searchKeyword = ref('');
+                const filterCondition = ref('');
+                const filterStatus = ref('');
+                const filterTag = ref('');
+                const showAddTagDialog = ref(false);
+                const showAddDeviceDialog = ref(false);
+                const showAddStrategyDialog = ref(false);
+                const selectedTags = ref([]);
+                const recallTab = ref('strategy');
+                const aiSelectedPatient = ref(1);
+                const aiInput = ref('');
+                const voiceInputActive = ref(false);
+                const hospitalSearch = ref('');
+                const healthPlanPatient = ref(1);
+                const showTcmResult = ref(false);
+                const currentQuestion = ref(0);
+                const questionnaireCompleted = ref(false);
+
+                const loginForm = reactive({ username: '', password: '' });
+                const userInfo = reactive({ name: '管理员', role: '系统管理员' });
+
+                const mainMenu = [
+                    { key: 'dashboard', name: '首页仪表盘', icon: '📊' },
+                    { key: 'patients', name: '患者管理', icon: '👥', badge: '新' },
+                    { key: 'glucose', name: '血糖监测', icon: '🩸' },
+                    { key: 'bloodpressure', name: '血压管理', icon: '🫀' }
+                ];
+
+                const aiMenu = [
+                    { key: 'aiassistant', name: 'AI助手', icon: '🤖' },
+                    { key: 'tcm', name: '中医体质辨识', icon: '🧘' },
+                    { key: 'healthplan', name: '主动健康管理', icon: '📋' },
+                    { key: 'report', name: 'AI健康报告', icon: '📄' }
+                ];
+
+                const deviceMenu = [
+                    { key: 'devices', name: '设备管理', icon: '📱', badge: '新' },
+                    { key: 'recall', name: '慢病回访', icon: '📞', badge: '热' },
+                    { key: 'patientmobile', name: '患者端模拟', icon: '📲' }
+                ];
+
+                const systemMenu = [
+                    { key: 'nutrition', name: '营养管理', icon: '🥗' },
+                    { key: 'medication', name: '用药管理', icon: '💊' },
+                    { key: 'followup', name: '随访管理', icon: '📋' },
+                    { key: 'settings', name: '系统设置', icon: '⚙️' }
+                ];
+
+                // 标签数据
+                const patientTags = ref([
+                    { id: 1, name: '糖尿病', color: '#1890ff', count: 45 },
+                    { id: 2, name: '高血压', color: '#ff4d4f', count: 32 },
+                    { id: 3, name: '高血脂', color: '#faad14', count: 18 },
+                    { id: 4, name: '心脏病史', color: '#722ed1', count: 12 },
+                    { id: 5, name: '吸烟', color: '#52c41a', count: 8 },
+                    { id: 6, name: '肥胖', color: '#eb2f96', count: 15 },
+                    { id: 7, name: '老年人', color: '#13c2c2', count: 56 },
+                    { id: 8, name: '依从性差', color: '#fa8c16', count: 6 }
+                ]);
+
+                // 患者数据
+                const patients = ref([
+                    { id: 1, name: '王建国', age: 68, gender: '男', phone: '138****5678', condition: '2型糖尿病', duration: '患病5年', status: '控制一般', glucose: '8.6', hbA1c: '7.8', sbp: 145, bp: '145/95', avatar: '👴', deviceBound: true, tags: [{id: 1, name: '糖尿病', color: '#1890ff'}, {id: 7, name: '老年人', color: '#13c2c2'}] },
+                    { id: 2, name: '李秀英', age: 62, gender: '女', phone: '139****8765', condition: '糖尿病+高血压', duration: '患病8年', status: '控制良好', glucose: '6.2', hbA1c: '6.5', sbp: 128, bp: '128/82', avatar: '👵', deviceBound: true, tags: [{id: 1, name: '糖尿病', color: '#1890ff'}, {id: 2, name: '高血压', color: '#ff4d4f'}] },
+                    { id: 3, name: '张明', age: 55, gender: '男', phone: '137****2345', condition: '2型糖尿病', duration: '患病3年', status: '控制不佳', glucose: '9.8', hbA1c: '8.5', sbp: 138, bp: '138/88', avatar: '👨', deviceBound: false, tags: [{id: 1, name: '糖尿病', color: '#1890ff'}, {id: 8, name: '依从性差', color: '#fa8c16'}] },
+                    { id: 4, name: '陈芳', age: 58, gender: '女', phone: '136****4321', condition: '糖尿病前期', duration: '高危人群', status: '控制良好', glucose: '5.8', hbA1c: '6.0', sbp: 122, bp: '122/78', avatar: '👩', deviceBound: true, tags: [{id: 6, name: '肥胖', color: '#eb2f96'}] },
+                    { id: 5, name: '刘伟', age: 72, gender: '男', phone: '135****6789', condition: '2型糖尿病', duration: '患病10年', status: '控制一般', glucose: '7.5', hbA1c: '7.2', sbp: 155, bp: '155/98', avatar: '👴', deviceBound: false, tags: [{id: 1, name: '糖尿病', color: '#1890ff'}, {id: 2, name: '高血压', color: '#ff4d4f'}, {id: 4, name: '心脏病史', color: '#722ed1'}] },
+                    { id: 6, name: '周丽', age: 65, gender: '女', phone: '134****9876', condition: '糖尿病+高血脂', duration: '患病6年', status: '控制良好', glucose: '6.8', hbA1c: '6.8', sbp: 132, bp: '132/85', avatar: '👵', deviceBound: true, tags: [{id: 1, name: '糖尿病', color: '#1890ff'}, {id: 3, name: '高血脂', color: '#faad14'}] },
+                    { id: 7, name: '赵强', age: 60, gender: '男', phone: '133****1234', condition: '2型糖尿病', duration: '患病4年', status: '控制一般', glucose: '7.8', hbA1c: '7.5', sbp: 142, bp: '142/92', avatar: '👨', deviceBound: false, tags: [{id: 1, name: '糖尿病', color: '#1890ff'}, {id: 5, name: '吸烟', color: '#52c41a'}] },
+                    { id: 8, name: '孙红', age: 54, gender: '女', phone: '132****5678', condition: '高血压', duration: '患病5年', status: '控制良好', glucose: '5.5', hbA1c: '5.8', sbp: 125, bp: '125/80', avatar: '👩', deviceBound: true, tags: [{id: 2, name: '高血压', color: '#ff4d4f'}] },
+                    { id: 9, name: '吴磊', age: 70, gender: '男', phone: '131****9012', condition: '糖尿病+高血压', duration: '患病12年', status: '控制不佳', glucose: '8.9', hbA1c: '8.2', sbp: 165, bp: '165/102', avatar: '👴', deviceBound: false, tags: [{id: 1, name: '糖尿病', color: '#1890ff'}, {id: 2, name: '高血压', color: '#ff4d4f'}] }
+                ]);
+
+                const filteredPatients = computed(() => {
+                    let result = patients.value;
+                    if (searchKeyword.value) {
+                        result = result.filter(p => p.name.includes(searchKeyword.value) || p.phone.includes(searchKeyword.value));
+                    }
+                    if (filterCondition.value) {
+                        const map = { type2: '2型糖尿病', dm_htn: '糖尿病+高血压', pre: '糖尿病前期', htn: '高血压' };
+                        result = result.filter(p => p.condition.includes(map[filterCondition.value]));
+                    }
+                    if (filterTag.value) {
+                        result = result.filter(p => p.tags.some(t => t.id === filterTag.value));
+                    }
+                    return result;
+                });
+
+                const warnings = ref([
+                    { id: 1, title: '王建国 - 血糖偏高预警', time: '10分钟前', patient: '空腹血糖 8.6 mmol/L', level: 'warning', icon: '⚠️' },
+                    { id: 2, title: '张明 - 用药依从性差', time: '30分钟前', patient: '已连续3天未服药', level: 'danger', icon: '💊' },
+                    { id: 3, title: '吴磊 - 血压控制不佳', time: '1小时前', patient: '收缩压 165 mmHg', level: 'danger', icon: '🫀' },
+                    { id: 4, title: '刘伟 - HbA1c超标', time: '2小时前', patient: '糖化血红蛋白 7.2%', level: 'warning', icon: '📊' }
+                ]);
+
+                const followups = ref([
+                    { id: 1, patient: '李秀英', typeLabel: '季度随访', time: '09:00', item: 'HbA1c、血脂、肾功能', type: 'info', icon: '📋' },
+                    { id: 2, patient: '陈芳', typeLabel: '月度复查', time: '10:30', item: '空腹血糖、血压', type: 'success', icon: '🩺' },
+                    { id: 3, patient: '周丽', typeLabel: '用药调整', time: '14:00', item: '降脂药物复查', type: 'info', icon: '💊' },
+                    { id: 4, patient: '赵强', typeLabel: '并发症筛查', time: '15:30', item: '眼底检查、足部评估', type: 'warning', icon: '🔬' }
+                ]);
+
+                const currentGlucose = reactive({ fasting: 6.5, postprandial: 8.2, hbA1c: 6.8, 达标率: 85 });
+                const currentBP = reactive({ bp: '128/82', sbp: 128, level: '正常血压', target: '< 130/80', 达标率: 78 });
+
+                const glucoseRecords = ref([
+                    { id: 1, time: '2024-03-26 07:30', fasting: 6.2, postprandial: 8.5, type: '早餐前/后', status: '达标', statusClass: 'achieved' },
+                    { id: 2, time: '2024-03-25 07:45', fasting: 6.5, postprandial: 9.2, type: '早餐前/后', status: '偏高', statusClass: 'warning' },
+                    { id: 3, time: '2024-03-24 07:20', fasting: 6.8, postprandial: 9.5, type: '早餐前/后', status: '偏高', statusClass: 'warning' }
+                ]);
+
+                const medications = ref([
+                    { id: 1, name: '二甲双胍', type: '双胍类', typeClass: 'metro', dose: '500mg', usage: '每日2次', time: '早、晚餐后', compliance: 92 },
+                    { id: 2, name: '阿卡波糖', type: 'α-糖苷酶抑制剂', typeClass: 'metro', dose: '50mg', usage: '每日3次', time: '餐时', compliance: 85 },
+                    { id: 3, name: '厄贝沙坦', type: 'ARB', typeClass: 'arb', dose: '150mg', usage: '每日1次', time: '早餐前', compliance: 88 }
+                ]);
+
+                const medicationStats = reactive({ 依从率: 82, 待服药: 3, 已服药: 2, 漏服: 2 });
+
+                const followupList = ref([
+                    { id: 1, patient: '李秀英', type: '季度随访', date: '2024-03-28', items: 'HbA1c、血脂四项、肾功能', status: '进行中' },
+                    { id: 2, patient: '陈芳', type: '月度复查', date: '2024-03-27', items: '空腹血糖、血压', status: '已完成' },
+                    { id: 3, patient: '周丽', type: '用药调整', date: '2024-03-29', items: '降脂药物复查', status: '待执行' }
+                ]);
+
+                const notifySettings = reactive({ medicine: true, glucose: true, exercise: true, followup: true, aiCall: true });
+                const thresholds = reactive({ glucoseMax: 10.0, glucoseMin: 3.9, bpMax: 140, alertInterval: 4 });
+
+                // 设备数据
+                const devices = ref([
+                    { id: 1, name: '智能血压计 BP-01', type: 'bp', code: 'BP-2024-001', status: 'online', patient: '王建国' },
+                    { id: 2, name: '智能血糖仪 GL-02', type: 'glucose', code: 'GL-2024-002', status: 'online', patient: '李秀英' },
+                    { id: 3, name: '智能血压计 BP-03', type: 'bp', code: 'BP-2024-003', status: 'binding', patient: '' },
+                    { id: 4, name: '智能血糖仪 GL-04', type: 'glucose', code: 'GL-2024-004', status: 'offline', patient: '' }
+                ]);
+                const deviceDataToday = ref(128);
+                const abnormalCount = ref(5);
+
+                const deviceRecords = ref([
+                    { id: 1, time: '2024-03-26 08:30', patient: '王建国', device: '智能血压计', bp: '145/95', sbp: 145, hr: 78, abnormal: true, abnormalLevel: 'mild' },
+                    { id: 2, time: '2024-03-26 07:45', patient: '李秀英', device: '智能血糖仪', bp: '-', sbp: 0, hr: 0, abnormal: false, abnormalLevel: '' },
+                    { id: 3, time: '2024-03-26 09:00', patient: '吴磊', device: '智能血压计', bp: '168/105', sbp: 168, hr: 82, abnormal: true, abnormalLevel: 'severe' },
+                    { id: 4, time: '2024-03-26 08:00', patient: '张明', device: '智能血糖仪', bp: '-', sbp: 0, hr: 0, abnormal: true, abnormalLevel: 'moderate' }
+                ]);
+
+                // AI助手数据
+                const aiMessages = ref([
+                    { id: 1, type: 'bot', content: '您好！我是AI健康助手。请问有什么可以帮助您的？' },
+                    { id: 2, type: 'user', content: '我的血糖有点高，应该注意什么？' },
+                    { id: 3, type: 'bot', content: '根据您的情况，建议：\n1. 控制碳水化合物摄入\n2. 增加运动量\n3. 定期监测血糖\n4. 按医嘱服药\n\n请问您还有其他问题吗？' }
+                ]);
+
+                const aiGlucose = reactive({ fasting: 6.5, postprandial: 8.2 });
+                const aiBP = reactive({ sbp: 128, dbp: 82 });
+
+                const hospitals = ref([
+                    { id: 1, name: '市第一人民医院', dept: '内分泌科', distance: '1.2km' },
+                    { id: 2, name: '中心医院', dept: '慢病管理中心', distance: '2.5km' },
+                    { id: 3, name: '社区卫生服务中心', dept: '全科', distance: '500m' }
+                ]);
+
+                // 中医体质数据
+                const tcmQuestions = ref([
+                    { id: 1, title: '您是否经常感到手脚冰凉？', selected: null, options: [{value: 1, label: '从不'}, {value: 2, label: '偶尔'}, {value: 3, label: '有时'}, {value: 4, label: '经常'}, {value: 5, label: '总是'}] },
+                    { id: 2, title: '您是否容易疲乏？', selected: null, options: [{value: 1, label: '从不'}, {value: 2, label: '偶尔'}, {value: 3, label: '有时'}, {value: 4, label: '经常'}, {value: 5, label: '总是'}] },
+                    { id: 3, title: '您的体型属于？', selected: null, options: [{value: 1, label: '偏瘦'}, {value: 2, label: '适中'}, {value: 3, label: '偏胖'}, {value: 4, label: '肥胖'}] },
+                    { id: 4, title: '您是否容易急躁？', selected: null, options: [{value: 1, label: '从不'}, {value: 2, label: '偶尔'}, {value: 3, label: '有时'}, {value: 4, label: '经常'}, {value: 5, label: '总是'}] },
+                    { id: 5, title: '您是否容易失眠？', selected: null, options: [{value: 1, label: '从不'}, {value: 2, label: '偶尔'}, {value: 3, label: '有时'}, {value: 4, label: '经常'}, {value: 5, label: '总是'}] }
+                ]);
+
+                const tcmTypes = ref([
+                    { name: '平和质', value: 35, color: '#52c41a' },
+                    { name: '气虚质', value: 25, color: '#1890ff' },
+                    { name: '阳虚质', value: 15, color: '#722ed1' },
+                    { name: '阴虚质', value: 10, color: '#faad14' },
+                    { name: '痰湿质', value: 8, color: '#ff4d4f' },
+                    { name: '湿热质', value: 7, color: '#eb2f96' }
+                ]);
+
+                const tcmResult = ref(null);
+                const questionnaireProgress = computed(() => Math.round((tcmQuestions.value.filter(q => q.selected !== null).length / tcmQuestions.value.length) * 100));
+
+                // 健康管理数据
+                const healthIndicators = reactive({ glucose: 8.6, hbA1c: 7.8, sbp: 145, bp: '145/95' });
+                const careLevel = computed(() => {
+                    const avg = (healthIndicators.glucose / 7 + healthIndicators.hbA1c / 6.5 + healthIndicators.sbp / 130) / 3;
+                    if (avg > 1.2) return { label: '高风险', type: 'error', desc: '多项指标异常，需要重点关注，建议尽快就医调整治疗方案' };
+                    if (avg > 1.1) return { label: '中风险', type: 'warning', desc: '部分指标异常，建议加强监测和生活方式干预' };
+                    return { label: '低风险', type: 'success', desc: '整体控制良好，继续保持当前管理方案' };
+                });
+
+                const healthPlans = ref([
+                    { id: 1, name: '每日血糖监测', desc: '每日测量空腹血糖和餐后血糖', icon: '🩸', color: '#1890ff', status: 'active' },
+                    { id: 2, name: '每周运动计划', desc: '每周至少5次有氧运动，每次30分钟', icon: '🏃', color: '#52c41a', status: 'active' },
+                    { id: 3, name: '低GI饮食计划', desc: '按营养师方案执行低GI饮食', icon: '🥗', color: '#faad14', status: 'pending' },
+                    { id: 4, name: '定期复查提醒', desc: '每月复查HbA1c和血脂', icon: '📋', color: '#722ed1', status: 'pending' }
+                ]);
+
+                const healthAlerts = ref([
+                    { id: 1, name: '空腹血糖', value: '8.6 mmol/L', range: '4.4-7.0 mmol/L', level: 'mild', suggestion: '注意饮食，增加运动' },
+                    { id: 2, name: 'HbA1c', value: '7.8%', range: '< 7.0%', level: 'moderate', suggestion: '考虑调整降糖方案' },
+                    { id: 3, name: '收缩压', value: '145 mmHg', range: '< 140 mmHg', level: 'mild', suggestion: '监测血压变化' }
+                ]);
+
+                // 回访数据
+                const recallStrategies = ref([
+                    { id: 1, name: '高血糖预警', conditions: ['血糖>10', '糖尿病'], actions: ['自动打标签', '发送消息', '生成回访任务'], enabled: true },
+                    { id: 2, name: '依从性提醒', conditions: ['连续3天未服药'], actions: ['AI外呼', '发送优惠券'], enabled: true },
+                    { id: 3, name: '月度随访', conditions: ['住院诊断'], actions: ['生成回访任务', '发送短信'], enabled: true }
+                ]);
+
+                const recallTasks = ref([
+                    { id: 1, patient: '张明', priority: 'high', reason: '血糖持续偏高，用药依从性差', status: 'pending', time: '2024-03-26 14:00' },
+                    { id: 2, patient: '吴磊', priority: 'high', reason: '血压控制不佳，需调整用药', status: 'pending', time: '2024-03-26 15:00' },
+                    { id: 3, patient: '刘伟', priority: 'medium', reason: 'HbA1c超标，建议复查', status: 'pending', time: '2024-03-27 09:00' }
+                ]);
+
+                const aiCallTasks = ref([
+                    { id: 1, name: '待外呼', count: 15 },
+                    { id: 2, name: '已接通', count: 8 },
+                    { id: 3, name: '需人工跟进', count: 3 }
+                ]);
+
+                const completedRecalls = computed(() => 45);
+                const failedRecalls = computed(() => 3);
+
+                const aiCallRecords = ref([
+                    { id: 1, patient: '张明', result: 'success', content: '您好，这是社区慢病管理中心的AI回访服务...', duration: '3:25', time: '2024-03-26 10:30', playProgress: 0, analysis: '患者表示近期饮食控制不佳，答应明天来复查', needHuman: false },
+                    { id: 2, patient: '吴磊', result: 'failed', content: '您好，这是社区慢病管理中心的AI回访服务...', duration: '0:15', time: '2024-03-26 09:15', playProgress: 0, analysis: '电话无人接听，建议人工二次回访', needHuman: true },
+                    { id: 3, patient: '刘伟', result: 'success', content: '您好，这是社区慢病管理中心的AI回访服务...', duration: '4:12', time: '2024-03-26 11:00', playProgress: 0, analysis: '患者已预约复查，情绪稳定', needHuman: false }
+                ]);
+
+                // 患者详情数据
+                const patientHealthPlans = ref([
+                    { id: 1, name: '每日血糖监测计划', desc: '每日测量空腹和餐后血糖', icon: '🩸', color: '#1890ff', status: 'active' },
+                    { id: 2, name: '每周运动计划', desc: '每周5次有氧运动', icon: '🏃', color: '#52c41a', status: 'active' },
+                    { id: 3, name: '用药提醒', desc: '按时服用二甲双胍', icon: '💊', color: '#faad14', status: 'pending' }
+                ]);
+
+                const patientRecords = ref([
+                    { id: 1, time: '2024-03-26 08:00', glucose: '8.6', postprandial: '-', sbp: 0, bp: '-', status: '偏高', statusClass: 'warning' },
+                    { id: 2, time: '2024-03-25 08:00', glucose: '8.2', postprandial: '10.5', sbp: 148, bp: '148/95', status: '偏高', statusClass: 'warning' },
+                    { id: 3, time: '2024-03-24 08:00', glucose: '7.8', postprandial: '9.8', sbp: 142, bp: '142/90', status: '达标', statusClass: 'achieved' }
+                ]);
+
+                const patientEvaluations = ref([
+                    { id: 1, title: '季度健康评估', desc: '综合评分78分，血糖控制一般', icon: '📊', type: 'orange', time: '2024-03-20' },
+                    { id: 2, title: '并发症筛查', desc: '眼底检查正常，足部血供良好', icon: '🔬', type: 'green', time: '2024-03-15' },
+                    { id: 3, title: '用药调整评估', desc: '建议增加阿卡波糖剂量', icon: '💊', type: 'blue', time: '2024-03-10' }
+                ]);
+
+                const patientVisits = ref([
+                    { id: 1, title: '门诊随访', desc: '血糖、血压复查，调整用药方案', icon: '🏥', type: 'blue', time: '2024-03-20', doctor: '张主任' },
+                    { id: 2, title: '电话随访', desc: '了解用药情况，提醒复查', icon: '📞', type: 'green', time: '2024-03-15', doctor: '李护士' },
+                    { id: 3, title: '上门随访', desc: '血压监测，健康宣教', icon: '🚪', type: 'purple', time: '2024-03-08', doctor: '王医生' }
+                ]);
+
+                const patientTracks = ref([
+                    { id: 1, title: '修改健康档案', desc: '更新了联系方式', icon: '✏️', type: 'blue', time: '2024-03-26 09:00', operator: '系统管理员' },
+                    { id: 2, title: '新增服务记录', desc: '开具了健康体检服务', icon: '📋', type: 'green', time: '2024-03-25 14:30', operator: '张主任' },
+                    { id: 3, title: '设备绑定', desc: '绑定了智能血压计 BP-01', icon: '📱', type: 'orange', time: '2024-03-24 10:00', operator: '系统' },
+                    { id: 4, title: '发送消息', desc: '发送了随访提醒短信', icon: '✉️', type: 'purple', time: '2024-03-23 08:00', operator: 'AI助手' },
+                    { id: 5, title: '标签变动', desc: '添加了"依从性差"标签', icon: '🏷️', type: 'red', time: '2024-03-22 16:00', operator: '系统' }
+                ]);
+
+                const newPatientForm = reactive({ name: '', gender: '男', age: 50, phone: '', condition: '', tags: [] });
+                const newTagForm = reactive({ name: '', color: '#1890ff' });
+
+                // AI统计
+                const aiStats = reactive({ calls: 23, success: 18, failed: 5 });
+
+                // 辅助函数
+                const getGlucoseClass = (value) => {
+                    if (value < 7.0) return 'normal';
+                    if (value < 10.0) return 'warning';
+                    return 'danger';
+                };
+
+                const getHbA1cClass = (value) => {
+                    if (value < 7.0) return 'normal';
+                    if (value < 8.0) return 'warning';
+                    return 'danger';
+                };
+
+                const getBPClass = (sbp) => {
+                    if (sbp < 130) return 'normal';
+                    if (sbp < 160) return 'warning';
+                    return 'danger';
+                };
+
+                const getBPTargetClass = (sbp) => {
+                    return sbp < 130 ? 'normal' : 'warning';
+                };
+
+                const getGlucoseStatus = (value) => {
+                    if (value >= 4.4 && value <= 7.0) return 'good';
+                    if (value >= 3.9 && value < 10.0) return 'warning';
+                    return 'danger';
+                };
+
+                const getGlucoseStatusText = (value) => {
+                    if (value >= 4.4 && value <= 7.0) return '✓ 达标';
+                    if (value >= 3.9 && value < 10.0) return '注意监测';
+                    return '⚠ 偏高';
+                };
+
+                const getHbA1cStatus = (value) => {
+                    if (value < 7.0) return 'good';
+                    if (value < 8.0) return 'warning';
+                    return 'danger';
+                };
+
+                const getHbA1cStatusText = (value) => {
+                    if (value < 7.0) return '✓ 达标';
+                    if (value < 8.0) return '注意';
+                    return '⚠ 超标';
+                };
+
+                const getStatusType = (status) => {
+                    if (status === '控制良好') return 'success';
+                    if (status === '控制一般') return 'warning';
+                    return 'danger';
+                };
+
+                const getTagType = (condition) => {
+                    if (condition.includes('糖尿病')) return 'primary';
+                    if (condition.includes('高血压')) return 'danger';
+                    return 'info';
+                };
+
+                const getTagBg = (condition) => {
+                    if (condition.includes('糖尿病')) return '#1890ff';
+                    if (condition.includes('高血压')) return '#ff4d4f';
+                    return '#909399';
+                };
+
+                const handleLogin = () => {
+                    loginLoading.value = true;
+                    setTimeout(() => {
+                        if (loginForm.username && loginForm.password) {
+                            isLoggedIn.value = true;
+                            loginLoading.value = false;
+                            nextTick(() => initCharts());
+                        } else {
+                            loginLoading.value = false;
+                            ElementPlus.ElMessage.warning('请输入用户名和密码');
+                        }
+                    }, 800);
+                };
+
+                const handleCommand = (command) => {
+                    if (command === 'logout') {
+                        isLoggedIn.value = false;
+                        loginForm.username = '';
+                        loginForm.password = '';
+                    }
+                };
+
+                const viewPatient = (patient) => {
+                    currentPatient.value = patient;
+                    patientDrawerVisible.value = true;
+                    nextTick(() => {
+                        if (document.getElementById('patientGlucoseChart')) {
+                            initPatientGlucoseChart();
+                        }
+                    });
+                };
+
+                const addPatient = () => {
+                    const newId = patients.value.length + 1;
+                    patients.value.push({
+                        id: newId,
+                        name: newPatientForm.name,
+                        age: newPatientForm.age,
+                        gender: newPatientForm.gender,
+                        phone: newPatientForm.phone,
+                        condition: newPatientForm.condition,
+                        duration: '新增',
+                        status: '控制一般',
+                        glucose: '7.0',
+                        hbA1c: '7.0',
+                        sbp: 130,
+                        bp: '130/85',
+                        avatar: newPatientForm.gender === '男' ? '👨' : '👩',
+                        deviceBound: false,
+                        tags: newPatientForm.tags.map(id => patientTags.value.find(t => t.id === id)).filter(Boolean)
+                    });
+                    dialogVisible.value = false;
+                    ElementPlus.ElMessage.success('患者添加成功');
+                };
+
+                const addTag = () => {
+                    const newId = patientTags.value.length + 1;
+                    patientTags.value.push({
+                        id: newId,
+                        name: newTagForm.name,
+                        color: newTagForm.color,
+                        count: 0
+                    });
+                    showAddTagDialog.value = false;
+                    ElementPlus.ElMessage.success('标签添加成功');
+                };
+
+                const handleTagCommand = (cmd, tag) => {
+                    if (cmd === 'delete') {
+                        patientTags.value = patientTags.value.filter(t => t.id !== tag.id);
+                        ElementPlus.ElMessage.success('标签已删除');
+                    }
+                };
+
+                const saveThresholds = () => {
+                    ElementPlus.ElMessage.success('阈值设置已保存');
+                };
+
+                const sendAiMessage = () => {
+                    if (!aiInput.value.trim()) return;
+                    aiMessages.value.push({ id: Date.now(), type: 'user', content: aiInput.value });
+                    const input = aiInput.value;
+                    aiInput.value = '';
+                    setTimeout(() => {
+                        aiMessages.value.push({
+                            id: Date.now(),
+                            type: 'bot',
+                            content: '感谢您的提问。根据您提供的信息，' + (input.includes('血糖') ? '建议您注意饮食控制和适量运动，定期监测血糖水平。' : '建议您保持良好的生活习惯，如有不适请及时就医。')
+                        });
+                    }, 1000);
+                };
+
+                const toggleVoiceInput = () => {
+                    voiceInputActive.value = !voiceInputActive.value;
+                    ElementPlus.ElMessage.info(voiceInputActive.value ? '语音输入已开启' : '语音输入已关闭');
+                };
+
+                const uploadHealthData = () => {
+                    ElementPlus.ElMessage.success('健康数据已上传，AI正在分析...');
+                    setTimeout(() => {
+                        ElementPlus.ElMessage.info('分析完成：血糖控制良好，继续保持');
+                    }, 2000);
+                };
+
+                const bookAppointment = (hospital) => {
+                    ElementPlus.ElMessage.success('已预约' + hospital.name + ' ' + hospital.dept);
+                };
+
+                const selectTcmOption = (q, value) => {
+                    q.selected = value;
+                };
+
+                const nextQuestion = () => {
+                    if (currentQuestion.value < tcmQuestions.value.length - 1) {
+                        currentQuestion.value++;
+                    }
+                };
+
+                const prevQuestion = () => {
+                    if (currentQuestion.value > 0) {
+                        currentQuestion.value--;
+                    }
+                };
+
+                const submitTcmQuestionnaire = () => {
+                    questionnaireCompleted.value = true;
+                    tcmResult.value = {
+                        type: '气虚质',
+                        score: 72,
+                        characteristics: '您平时容易疲乏、气短懒言，易患感冒，恢复较慢。建议适当进行轻度运动，如散步、太极拳等。',
+                        regimen: '1. 饮食宜补气健脾，如山药、黄芪等\n2. 适当运动，避免过度劳累\n3. 保证充足睡眠\n4. 可配合艾灸足三里等穴位',
+                        diet: '宜多食益气健脾的食物，如山药、莲子、红枣、鸡肉等。少吃耗气食物，如萝卜、空心菜等。'
+                    };
+                    ElementPlus.ElMessage.success('问卷已提交，正在分析体质...');
+                };
+
+                const resetTcmQuestionnaire = () => {
+                    questionnaireCompleted.value = false;
+                    currentQuestion.value = 0;
+                    tcmQuestions.value.forEach(q => q.selected = null);
+                    tcmResult.value = null;
+                };
+
+                const generateHealthPlan = () => {
+                    ElementPlus.ElMessage.success('AI正在为您生成个性化健康计划...');
+                    setTimeout(() => {
+                        ElementPlus.ElMessage.success('健康计划已生成');
+                    }, 1500);
+                };
+
+                const bindDevice = (device) => {
+                    if (device.patient) {
+                        device.patient = '';
+                        device.status = 'offline';
+                        ElementPlus.ElMessage.info('设备已解绑');
+                    } else {
+                        showAddDeviceDialog.value = true;
+                    }
+                };
+
+                const viewDeviceData = (device) => {
+                    currentPage.value = 'devices';
+                    ElementPlus.ElMessage.info('查看设备数据：' + device.name);
+                };
+
+                const executeRecall = (task) => {
+                    ElementPlus.ElMessage.success('正在执行回访：' + task.patient);
+                };
+
+                const playRecording = (call) => {
+                    ElementPlus.ElMessage.info('播放录音：' + call.patient);
+                };
+
+                const viewChatLog = (call) => {
+                    ElementPlus.ElMessage.info('查看聊天记录：' + call.patient);
+                };
+
+                const exportCallRecord = (call) => {
+                    ElementPlus.ElMessage.success('正在导出：' + call.patient + '的通话记录');
+                };
+
+                // 图表初始化
+                let glucoseChart, targetChart, bpChart, conditionChart, glucoseTrendChart, hbA1cChart, bpTrendChart, bpAchievementChart, followupChart, checkupChart, patientGlucoseChart, tcmDistChart;
+
+                const initCharts = () => {
+                    initGlucoseChart();
+                    initTargetChart();
+                    initBPChart();
+                    initConditionChart();
+                    initGlucoseTrendChart();
+                    initHbA1cChart();
+                    initBPTrendChart();
+                    initBPAchievementChart();
+                    initFollowupChart();
+                    initCheckupChart();
+                    initTcmDistChart();
+                };
+
+                const initGlucoseChart = () => {
+                    const chartDom = document.getElementById('glucoseChart');
+                    if (!chartDom) return;
+                    glucoseChart = echarts.init(chartDom);
+                    glucoseChart.setOption({
+                        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { data: ['空腹血糖', '餐后血糖', '目标值'], bottom: 0 },
+                        grid: { left: '3%', right: '4%', bottom: '18%', top: '10%', containLabel: true },
+                        xAxis: { type: 'category', boundaryGap: false, data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'], axisLine: { lineStyle: { color: '#e4e7ed' } }, axisLabel: { color: '#606266' } },
+                        yAxis: { type: 'value', min: 4, max: 12, axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#606266' } },
+                        series: [
+                            { name: '空腹血糖', type: 'line', smooth: true, data: [6.2, 6.5, 6.3, 6.8, 6.4, 6.1, 6.0], lineStyle: { width: 3, color: '#1890ff' }, itemStyle: { color: '#1890ff' }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(24,144,255,0.3)' }, { offset: 1, color: 'rgba(24,144,255,0.05)' }]) } },
+                            { name: '餐后血糖', type: 'line', smooth: true, data: [8.5, 9.2, 8.8, 9.5, 8.6, 8.2, 8.0], lineStyle: { width: 3, color: '#52c41a' }, itemStyle: { color: '#52c41a' } },
+                            { name: '目标值', type: 'line', data: [7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0], lineStyle: { width: 2, type: 'dashed', color: '#909399' }, itemStyle: { color: '#909399' }, symbol: 'none' }
+                        ]
+                    });
+                };
+
+                const initTargetChart = () => {
+                    const chartDom = document.getElementById('targetChart');
+                    if (!chartDom) return;
+                    targetChart = echarts.init(chartDom);
+                    targetChart.setOption({
+                        tooltip: { trigger: 'item', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { orient: 'vertical', right: '5%', top: 'center' },
+                        series: [{ name: '达标率', type: 'pie', radius: ['45%', '70%'], center: ['35%', '50%'], itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 }, label: { show: false }, emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } }, data: [
+                            { value: 580, name: '血糖达标', itemStyle: { color: '#52c41a' } },
+                            { value: 286, name: '血糖偏高', itemStyle: { color: '#faad14' } },
+                            { value: 420, name: '需关注', itemStyle: { color: '#ff4d4f' } }
+                        ]}]
+                    });
+                };
+
+                const initBPChart = () => {
+                    const chartDom = document.getElementById('bpChart');
+                    if (!chartDom) return;
+                    bpChart = echarts.init(chartDom);
+                    bpChart.setOption({
+                        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { data: ['正常', '正常高值', '1级高血压', '2级高血压'], bottom: 0 },
+                        grid: { left: '3%', right: '4%', bottom: '18%', top: '10%', containLabel: true },
+                        xAxis: { type: 'category', data: ['正常', '正常高值', '1级高血压', '2级高血压'], axisLine: { lineStyle: { color: '#e4e7ed' } }, axisLabel: { color: '#606266' } },
+                        yAxis: { type: 'value', axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#606266' } },
+                        series: [{ name: '患者数', type: 'bar', data: [420, 386, 320, 160], itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#1890ff' }, { offset: 1, color: '#69b1ff' }]), borderRadius: [6, 6, 0, 0] } }]
+                    });
+                };
+
+                const initConditionChart = () => {
+                    const chartDom = document.getElementById('conditionChart');
+                    if (!chartDom) return;
+                    conditionChart = echarts.init(chartDom);
+                    conditionChart.setOption({
+                        tooltip: { trigger: 'item', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { orient: 'vertical', right: '5%', top: 'center' },
+                        series: [{ name: '病情构成', type: 'pie', radius: ['40%', '65%'], center: ['35%', '50%'], roseType: 'radius', itemStyle: { borderRadius: 5 }, data: [
+                            { value: 650, name: '2型糖尿病', itemStyle: { color: '#1890ff' } },
+                            { value: 280, name: '糖尿病+高血压', itemStyle: { color: '#722ed1' } },
+                            { value: 186, name: '糖尿病前期', itemStyle: { color: '#52c41a' } },
+                            { value: 170, name: '高血压', itemStyle: { color: '#faad14' } }
+                        ]}]
+                    });
+                };
+
+                const initGlucoseTrendChart = () => {
+                    const chartDom = document.getElementById('glucoseTrendChart');
+                    if (!chartDom) return;
+                    glucoseTrendChart = echarts.init(chartDom);
+                    glucoseTrendChart.setOption({
+                        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { data: ['空腹', '餐后2h', '目标范围'], bottom: 0 },
+                        grid: { left: '3%', right: '4%', bottom: '18%', top: '10%', containLabel: true },
+                        xAxis: { type: 'category', data: ['03-20', '03-21', '03-22', '03-23', '03-24', '03-25', '03-26'], axisLine: { lineStyle: { color: '#e4e7ed' } }, axisLabel: { color: '#606266' } },
+                        yAxis: { type: 'value', min: 4, max: 12, axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#606266' } },
+                        series: [
+                            { name: '空腹', type: 'line', smooth: true, data: [6.2, 6.5, 6.3, 6.8, 6.4, 6.1, 6.0], lineStyle: { width: 3, color: '#1890ff' }, itemStyle: { color: '#1890ff' }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(24,144,255,0.2)' }, { offset: 1, color: 'rgba(24,144,255,0.02)' }]) } },
+                            { name: '餐后2h', type: 'line', smooth: true, data: [8.5, 9.2, 8.8, 9.5, 8.6, 8.2, 8.0], lineStyle: { width: 3, color: '#52c41a' }, itemStyle: { color: '#52c41a' } }
+                        ]
+                    });
+                };
+
+                const initHbA1cChart = () => {
+                    const chartDom = document.getElementById('hbA1cChart');
+                    if (!chartDom) return;
+                    hbA1cChart = echarts.init(chartDom);
+                    hbA1cChart.setOption({
+                        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { data: ['HbA1c', '目标值'], bottom: 0 },
+                        grid: { left: '3%', right: '4%', bottom: '18%', top: '10%', containLabel: true },
+                        xAxis: { type: 'category', data: ['2023-06', '2023-09', '2023-12', '2024-03'], axisLine: { lineStyle: { color: '#e4e7ed' } }, axisLabel: { color: '#606266' } },
+                        yAxis: { type: 'value', min: 5, max: 10, axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#606266' } },
+                        series: [
+                            { name: 'HbA1c', type: 'bar', data: [7.5, 7.2, 6.9, 6.8], itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#1890ff' }, { offset: 1, color: '#69b1ff' }]), borderRadius: [6, 6, 0, 0] } },
+                            { name: '目标值', type: 'line', data: [7.0, 7.0, 7.0, 7.0], lineStyle: { width: 2, type: 'dashed', color: '#ff4d4f' }, itemStyle: { color: '#ff4d4f' }, symbol: 'none' }
+                        ]
+                    });
+                };
+
+                const initBPTrendChart = () => {
+                    const chartDom = document.getElementById('bpTrendChart');
+                    if (!chartDom) return;
+                    bpTrendChart = echarts.init(chartDom);
+                    bpTrendChart.setOption({
+                        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { data: ['收缩压', '舒张压', '目标值'], bottom: 0 },
+                        grid: { left: '3%', right: '4%', bottom: '18%', top: '10%', containLabel: true },
+                        xAxis: { type: 'category', data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'], axisLine: { lineStyle: { color: '#e4e7ed' } }, axisLabel: { color: '#606266' } },
+                        yAxis: { type: 'value', min: 60, max: 180, axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#606266' } },
+                        series: [
+                            { name: '收缩压', type: 'line', smooth: true, data: [135, 132, 138, 130, 128, 125, 122], lineStyle: { width: 3, color: '#ff4d4f' }, itemStyle: { color: '#ff4d4f' } },
+                            { name: '舒张压', type: 'line', smooth: true, data: [88, 85, 90, 82, 80, 78, 76], lineStyle: { width: 3, color: '#1890ff' }, itemStyle: { color: '#1890ff' } },
+                            { name: '目标值', type: 'line', data: [130, 130, 130, 130, 130, 130, 130], lineStyle: { width: 2, type: 'dashed', color: '#909399' }, itemStyle: { color: '#909399' }, symbol: 'none' }
+                        ]
+                    });
+                };
+
+                const initBPAchievementChart = () => {
+                    const chartDom = document.getElementById('bpAchievementChart');
+                    if (!chartDom) return;
+                    bpAchievementChart = echarts.init(chartDom);
+                    bpAchievementChart.setOption({
+                        series: [{
+                            type: 'gauge', center: ['50%', '60%'], startAngle: 200, endAngle: -20,
+                            min: 0, max: 100, splitNumber: 10, itemStyle: { color: '#52c41a' },
+                            progress: { show: true, width: 20 }, pointer: { show: false },
+                            axisLine: { lineStyle: { width: 20, color: [[1, '#f0f2f5']] } },
+                            axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
+                            title: { offsetCenter: [0, '20%'], fontSize: 14, color: '#303133' },
+                            detail: { valueAnimation: true, width: '60%', lineHeight: 40, borderRadius: 8, offsetCenter: [0, '-10%'], fontSize: 32, fontWeight: 'bold', formatter: '{value}%', color: '#303133' },
+                            data: [{ value: 78, name: '血压达标率' }]
+                        }]
+                    });
+                };
+
+                const initFollowupChart = () => {
+                    const chartDom = document.getElementById('followupChart');
+                    if (!chartDom) return;
+                    followupChart = echarts.init(chartDom);
+                    followupChart.setOption({
+                        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { data: ['已执行', '待执行', '逾期'], bottom: 0 },
+                        grid: { left: '3%', right: '4%', bottom: '18%', top: '10%', containLabel: true },
+                        xAxis: { type: 'category', data: ['第1周', '第2周', '第3周', '第4周'], axisLine: { lineStyle: { color: '#e4e7ed' } }, axisLabel: { color: '#606266' } },
+                        yAxis: { type: 'value', axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#606266' } },
+                        series: [
+                            { name: '已执行', type: 'bar', stack: 'total', data: [45, 52, 48, 55], itemStyle: { color: '#52c41a' }, barWidth: 20 },
+                            { name: '待执行', type: 'bar', stack: 'total', data: [15, 12, 18, 20], itemStyle: { color: '#1890ff' }, barWidth: 20 },
+                            { name: '逾期', type: 'bar', stack: 'total', data: [5, 3, 2, 4], itemStyle: { color: '#ff4d4f' }, barWidth: 20 }
+                        ]
+                    });
+                };
+
+                const initCheckupChart = () => {
+                    const chartDom = document.getElementById('checkupChart');
+                    if (!chartDom) return;
+                    checkupChart = echarts.init(chartDom);
+                    checkupChart.setOption({
+                        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' }, axisPointer: { type: 'shadow' } },
+                        legend: { data: ['完成率'], bottom: 0 },
+                        grid: { left: '3%', right: '4%', bottom: '18%', top: '10%', containLabel: true },
+                        xAxis: { type: 'category', data: ['血糖', 'HbA1c', '血压', '血脂', '肾功', '心电图'], axisLine: { lineStyle: { color: '#e4e7ed' } }, axisLabel: { color: '#606266' } },
+                        yAxis: { type: 'value', max: 100, axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#606266', formatter: '{value}%' } },
+                        series: [{ name: '完成率', type: 'bar', data: [92, 85, 88, 76, 82, 70], itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#1890ff' }, { offset: 1, color: '#69b1ff' }]), borderRadius: [6, 6, 0, 0] } }]
+                    });
+                };
+
+                const initTcmDistChart = () => {
+                    const chartDom = document.getElementById('tcmDistChart');
+                    if (!chartDom) return;
+                    tcmDistChart = echarts.init(chartDom);
+                    tcmDistChart.setOption({
+                        tooltip: { trigger: 'item', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        series: [{
+                            type: 'pie', radius: ['45%', '70%'], center: ['50%', '50%'],
+                            itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+                            label: { show: true, formatter: '{b}: {d}%' },
+                            data: tcmTypes.value.map(t => ({ value: t.value, name: t.name, itemStyle: { color: t.color } }))
+                        }]
+                    });
+                };
+
+                const initPatientGlucoseChart = () => {
+                    const chartDom = document.getElementById('patientGlucoseChart');
+                    if (!chartDom) return;
+                    patientGlucoseChart = echarts.init(chartDom);
+                    patientGlucoseChart.setOption({
+                        tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#e4e7ed', textStyle: { color: '#303133' } },
+                        legend: { data: ['空腹血糖', '餐后血糖'], bottom: 0 },
+                        grid: { left: '3%', right: '4%', bottom: '18%', top: '10%', containLabel: true },
+                        xAxis: { type: 'category', data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'], axisLine: { lineStyle: { color: '#e4e7ed' } }, axisLabel: { color: '#606266' } },
+                        yAxis: { type: 'value', min: 4, max: 12, axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#606266' } },
+                        series: [
+                            { name: '空腹血糖', type: 'line', smooth: true, data: [6.5, 6.8, 7.2, 6.9, 7.5, 6.8, 7.0], lineStyle: { width: 3, color: '#1890ff' }, itemStyle: { color: '#1890ff' }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(24,144,255,0.3)' }, { offset: 1, color: 'rgba(24,144,255,0.05)' }]) } },
+                            { name: '餐后血糖', type: 'line', smooth: true, data: [9.2, 9.5, 10.2, 9.0, 10.5, 9.2, 9.0], lineStyle: { width: 3, color: '#52c41a' }, itemStyle: { color: '#52c41a' } }
+                        ]
+                    });
+                };
+
+                const handleResize = () => {
+                    glucoseChart?.resize();
+                    targetChart?.resize();
+                    bpChart?.resize();
+                    conditionChart?.resize();
+                    glucoseTrendChart?.resize();
+                    hbA1cChart?.resize();
+                    bpTrendChart?.resize();
+                    bpAchievementChart?.resize();
+                    followupChart?.resize();
+                    checkupChart?.resize();
+                    patientGlucoseChart?.resize();
+                    tcmDistChart?.resize();
+                };
+
+                watch(currentPage, (newVal) => {
+                    nextTick(() => {
+                        if (newVal === 'dashboard') { initGlucoseChart(); initTargetChart(); initBPChart(); initConditionChart(); }
+                        else if (newVal === 'glucose') { initGlucoseTrendChart(); initHbA1cChart(); }
+                        else if (newVal === 'bloodpressure') { initBPTrendChart(); initBPAchievementChart(); }
+                        else if (newVal === 'followup') { initFollowupChart(); initCheckupChart(); }
+                        else if (newVal === 'tcm') { initTcmDistChart(); }
+                        else if (newVal === 'patientmobile' && currentPatient.value) { initPatientGlucoseChart(); }
+                    });
+                });
+
+                window.addEventListener('resize', handleResize);
+
+                onMounted(() => {
+                    setTimeout(() => { loading.value = false; }, 500);
+                });
+
+                return {
+                    loading, isLoggedIn, loginLoading, currentPage, glucosePeriod, loginForm, userInfo,
+                    mainMenu, aiMenu, deviceMenu, systemMenu, patients, filteredPatients, warnings, followups,
+                    currentGlucose, currentBP, glucoseRecords, medications, medicationStats, followupList, notifySettings, thresholds,
+                    searchKeyword, filterCondition, filterStatus, filterTag, currentPageNum,
+                    showAddGlucoseDialog, dialogVisible, patientDrawerVisible, currentPatient,
+                    showAddTagDialog, showAddDeviceDialog, showAddStrategyDialog, selectedTags,
+                    patientTags, recallTab, aiSelectedPatient, aiInput, voiceInputActive, hospitalSearch,
+                    healthPlanPatient, showTcmResult, currentQuestion, questionnaireCompleted, tcmQuestions,
+                    tcmTypes, tcmResult, questionnaireProgress,
+                    healthIndicators, careLevel, healthPlans, healthAlerts,
+                    recallStrategies, recallTasks, aiCallTasks, completedRecalls, failedRecalls, aiCallRecords,
+                    patientHealthPlans, patientRecords, patientEvaluations, patientVisits, patientTracks,
+                    newPatientForm, newTagForm,
+                    devices, deviceDataToday, abnormalCount, deviceRecords,
+                    aiMessages, aiGlucose, aiBP, hospitals,
+                    aiStats,
+                    handleLogin, handleCommand, viewPatient, addPatient, addTag, handleTagCommand, saveThresholds,
+                    sendAiMessage, toggleVoiceInput, uploadHealthData, bookAppointment,
+                    selectTcmOption, nextQuestion, prevQuestion, submitTcmQuestionnaire, resetTcmQuestionnaire,
+                    generateHealthPlan, bindDevice, viewDeviceData, executeRecall, playRecording, viewChatLog, exportCallRecord,
+                    getGlucoseClass, getHbA1cClass, getBPClass, getBPTargetClass, getGlucoseStatus,
+                    getGlucoseStatusText, getHbA1cStatus, getHbA1cStatusText, getStatusType, getTagType, getTagBg
+                };
+            }
+        });
+        
+        app.use(ElementPlus);
+        app.mount('#app');
+    </script>
+</body>
+</html>
