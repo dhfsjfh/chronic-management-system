@@ -16,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const CLOUD_HOST = process.env.RENDER || process.env.RAILWAY_ENVIRONMENT || process.env.FLY_APP_NAME || process.env.PUBLIC_API_BASE_URL;
 const HOST = process.env.HOST || (CLOUD_HOST ? '0.0.0.0' : '127.0.0.1');
-const DEMO_MODE = String(process.env.DEMO_MODE || '').toLowerCase() === 'true';
+const DEMO_MODE = String(process.env.DEMO_MODE || 'true').toLowerCase() !== 'false';
 const JUDGE_ACCOUNT_PHONE = process.env.JUDGE_ACCOUNT_PHONE || '13800138001';
 const JUDGE_ACCOUNT_PASSWORD = process.env.JUDGE_ACCOUNT_PASSWORD || '123';
 const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || '')
@@ -24,8 +24,8 @@ const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || '')
   .map(s => s.trim())
   .filter(Boolean);
 const PUBLIC_API_READONLY = String(
-  process.env.PUBLIC_API_READONLY || (process.env.NODE_ENV === 'production' ? 'true' : '')
-).toLowerCase() === 'true';
+  process.env.PUBLIC_API_READONLY || 'true'
+).toLowerCase() !== 'false';
 
 app.use(cors({
   origin(origin, callback) {
