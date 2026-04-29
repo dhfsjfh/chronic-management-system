@@ -23,6 +23,9 @@ const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || '')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
+const PUBLIC_API_READONLY = String(
+  process.env.PUBLIC_API_READONLY || (process.env.NODE_ENV === 'production' ? 'true' : '')
+).toLowerCase() === 'true';
 
 app.use(cors({
   origin(origin, callback) {
@@ -126,7 +129,7 @@ function forbidMutation(req, res, next) {
 }
 
 function requireCozeWebhookSecret(req, res, next) {
-  if (String(process.env.PUBLIC_API_READONLY || '').toLowerCase() === 'true') {
+  if (PUBLIC_API_READONLY) {
     return res.status(403).json(cozeFail('Public demo API is read-only', 403));
   }
   const expected = process.env.COZE_WEBHOOK_SECRET || '';
@@ -726,7 +729,7 @@ app.get('/api/coze/status', (req, res) => {
     service: 'community-chronic-disease-backend',
     ready,
     demoMode: DEMO_MODE,
-    publicApiReadonly: String(process.env.PUBLIC_API_READONLY || '').toLowerCase() === 'true',
+    publicApiReadonly: PUBLIC_API_READONLY,
     publicApiBaseUrl,
     coze: {
       tokenConfigured: coze.tokenConfigured,
