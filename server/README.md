@@ -56,7 +56,7 @@ node server.js
 修改 `miniprogram/utils/request.js` 中的 `BASE_URL`：
 
 ```js
-const BASE_URL = 'http://localhost:3000';  // 开发环境
+const BASE_URL = 'https://chronic-management-system.onrender.com';  // 公网演示环境
 
 // 生产环境请使用实际服务器地址
 // const BASE_URL = 'https://your-server.com';

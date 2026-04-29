@@ -8,5 +8,7 @@
  */
 (function (w) {
   w.__DEMO_STATIC__ = false;
+  // 公网后端（Render）
+  w.__API_ORIGIN__ = 'https://chronic-management-system.onrender.com';
   w.__API_BASE_PATH__ = '';
 })(window);

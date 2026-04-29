@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://chronic-management-system.onrender.com';
 const TIMEOUT = 10000;
 
 function request({ url, method = 'GET', data = {}, header = {} }) {

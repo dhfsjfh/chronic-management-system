@@ -412,13 +412,41 @@
                             <p class="dashboard-subtitle">AI驱动的智能健康管理 · 实时监测 · 主动预警</p>
                         </div>
 
+                        <el-alert
+                            v-if="publicReadonly"
+                            type="info"
+                            show-icon
+                            :closable="false"
+                            style="margin-bottom: 16px;"
+                            title="公开演示环境（只读）"
+                            description="当前为公网演示环境，数据写入已关闭。新增/编辑/删除等操作会提示不可写入，不视为系统故障。"
+                        />
+                        <el-alert
+                            v-if="apiWakingUp"
+                            type="warning"
+                            show-icon
+                            :closable="false"
+                            style="margin-bottom: 16px;"
+                            title="服务唤醒中，请稍候"
+                            description="Render 首次访问可能需要数秒冷启动。正在尝试连接后端，请稍候刷新或稍后再试。"
+                        />
+                        <el-alert
+                            v-if="apiError"
+                            type="error"
+                            show-icon
+                            :closable="true"
+                            style="margin-bottom: 16px;"
+                            title="后端暂不可用"
+                            :description="apiError"
+                        />
+
                         <div class="stats-grid">
                             <div class="stat-card blue">
                                 <div class="stat-header">
                                     <div class="stat-icon blue">👥</div>
                                     <div class="stat-trend up">↑ 12</div>
                                 </div>
-                                <div class="stat-value">1,286</div>
+                                <div class="stat-value">{{ overview.patientCount ?? '--' }}</div>
                                 <div class="stat-label">管理患者数</div>
                             </div>
                             <div class="stat-card green">
@@ -426,24 +454,24 @@
                                     <div class="stat-icon green">📊</div>
                                     <div class="stat-trend up">↑ 5%</div>
                                 </div>
-                                <div class="stat-value">89.2<small>%</small></div>
-                                <div class="stat-label">血糖达标率</div>
+                                <div class="stat-value">{{ overview.todayCheckinCount ?? '--' }}</div>
+                                <div class="stat-label">今日打卡数</div>
                             </div>
                             <div class="stat-card orange">
                                 <div class="stat-header">
                                     <div class="stat-icon orange">💉</div>
                                     <div class="stat-trend down">↓ 2%</div>
                                 </div>
-                                <div class="stat-value">76.5<small>%</small></div>
-                                <div class="stat-label">用药依从性</div>
+                                <div class="stat-value">{{ overview.pendingAlertCount ?? '--' }}</div>
+                                <div class="stat-label">待处理预警</div>
                             </div>
                             <div class="stat-card purple">
                                 <div class="stat-header">
                                     <div class="stat-icon purple">📋</div>
                                     <div class="stat-trend up">↑ 8</div>
                                 </div>
-                                <div class="stat-value">23</div>
-                                <div class="stat-label">待随访患者</div>
+                                <div class="stat-value">{{ overview.pendingFollowupCount ?? '--' }}</div>
+                                <div class="stat-label">待回访</div>
                             </div>
                             <div class="stat-card red">
                                 <div class="stat-header">
@@ -526,7 +554,7 @@
                                             <div class="alert-title">{{ w.title }}</div>
                                             <div class="alert-time">{{ w.time }} · {{ w.patient }}</div>
                                         </div>
-                                        <el-button type="primary" text size="small">处理</el-button>
+                                        <el-button type="primary" text size="small" @click.stop="onReadonlyWrite('预警处理')">处理</el-button>
                                     </div>
                                 </div>
                             </div>
@@ -542,7 +570,7 @@
                                             <div class="alert-title">{{ f.patient }} - {{ f.typeLabel }}</div>
                                             <div class="alert-time">{{ f.time }} · {{ f.item }}</div>
                                         </div>
-                                        <el-button type="primary" text size="small">执行</el-button>
+                                        <el-button type="primary" text size="small" @click.stop="onReadonlyWrite('随访执行')">执行</el-button>
                                     </div>
                                 </div>
                             </div>
@@ -560,7 +588,7 @@
                         <div class="panel" style="margin-bottom: 20px;">
                             <div class="panel-header">
                                 <span class="panel-title">🏷️ 患者标签管理</span>
-                                <el-button type="primary" size="small" @click="showAddTagDialog = true">+ 新增标签</el-button>
+                                <el-button type="primary" size="small" @click="onReadonlyWrite('新增标签')">+ 新增标签</el-button>
                             </div>
                             <div class="tag-manage-grid">
                                 <div v-for="tag in patientTags" :key="tag.id" class="tag-manage-item">
@@ -613,7 +641,7 @@
                                         <el-option v-for="tag in patientTags" :key="tag.id" :label="tag.name" :value="tag.id" />
                                     </el-select>
                                 </div>
-                                <el-button type="primary" @click="dialogVisible = true">+ 新增患者</el-button>
+                                <el-button type="primary" @click="onReadonlyWrite('新增患者')">+ 新增患者</el-button>
                             </div>
 
                             <div class="patient-list">
@@ -645,7 +673,7 @@
                                             <div class="patient-stat-label">空腹血糖</div>
                                         </div>
                                         <div class="patient-stat">
-                                            <div class="patient-stat-value" :class="getHbA1cClass(p.hbA1c)">{{ p.hbA1c }}%</div>
+                                            <div class="patient-stat-value" :class="getHbA1cClass(p.hbA1c)">{{ p.hbA1c ? (p.hbA1c + '%') : '--' }}</div>
                                             <div class="patient-stat-label">HbA1c</div>
                                         </div>
                                         <div class="patient-stat">
@@ -1735,7 +1763,7 @@
                                 <div class="indicator-label">空腹血糖 (mmol/L)</div>
                             </div>
                             <div class="indicator-card">
-                                <div class="indicator-value" :class="getHbA1cClass(currentPatient.hbA1c)">{{ currentPatient.hbA1c }}%</div>
+                                <div class="indicator-value" :class="getHbA1cClass(currentPatient.hbA1c)">{{ currentPatient.hbA1c ? (currentPatient.hbA1c + '%') : '--' }}</div>
                                 <div class="indicator-label">HbA1c 糖化血红蛋白</div>
                             </div>
                             <div class="indicator-card">
@@ -1850,6 +1878,20 @@
                 const loading = ref(true);
                 const isLoggedIn = ref(false);
                 const loginLoading = ref(false);
+                const API_BASE_URL = (window.API_BASE_URL || 'https://chronic-management-system.onrender.com').replace(/\/+$/, '');
+                const apiError = ref('');
+                const apiWakingUp = ref(false);
+                const publicReadonly = ref(true);
+                const token = ref(localStorage.getItem('demo_token') || '');
+                const overview = reactive({
+                    patientCount: null,
+                    todayCheckinCount: null,
+                    pendingAlertCount: null,
+                    pendingFollowupCount: null,
+                    recentAlerts: [],
+                    recentFollowups: [],
+                    chronicDistribution: []
+                });
                 const currentPage = ref('dashboard');
                 const glucosePeriod = ref('week');
                 const showAddGlucoseDialog = ref(false);
@@ -1944,6 +1986,173 @@
                     }
                     return result;
                 });
+
+                const onReadonlyWrite = (actionName) => {
+                    if (publicReadonly.value) {
+                        ElementPlus.ElMessage.info(`当前为公开演示环境，数据写入已关闭（${actionName}）`);
+                        return true;
+                    }
+                    return false;
+                };
+
+                const buildUrl = (p) => `${API_BASE_URL}${p.startsWith('/') ? '' : '/'}${p}`;
+
+                const apiFetch = async ({ method = 'GET', path, body, auth = false, timeoutMs = 12000 }) => {
+                    apiError.value = '';
+                    apiWakingUp.value = false;
+                    const controller = new AbortController();
+                    const t = setTimeout(() => controller.abort(), timeoutMs);
+                    try {
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (auth && token.value) headers['Authorization'] = `Bearer ${token.value}`;
+                        const resp = await fetch(buildUrl(path), {
+                            method,
+                            headers,
+                            body: body ? JSON.stringify(body) : undefined,
+                            signal: controller.signal
+                        });
+
+                        if (resp.status === 403) {
+                            publicReadonly.value = true;
+                            const j = await resp.json().catch(() => ({}));
+                            const msg = (j && j.message) || '公开演示环境不可写入';
+                            const err = new Error(msg);
+                            err.__kind = 'readonly';
+                            throw err;
+                        }
+
+                        // Render 冷启动 / 临时不可用
+                        if ([502, 503, 504].includes(resp.status)) {
+                            apiWakingUp.value = true;
+                            throw new Error('服务唤醒中，请稍候');
+                        }
+
+                        const json = await resp.json().catch(() => ({}));
+                        if (!resp.ok) {
+                            throw new Error((json && json.message) || `HTTP ${resp.status}`);
+                        }
+                        if (json && typeof json === 'object' && 'code' in json && json.code !== 200) {
+                            throw new Error(json.message || '请求失败');
+                        }
+                        return json.data;
+                    } catch (e) {
+                        if (String(e && e.name) === 'AbortError') {
+                            apiWakingUp.value = true;
+                            throw new Error('服务唤醒中，请稍候');
+                        }
+                        throw e;
+                    } finally {
+                        clearTimeout(t);
+                    }
+                };
+
+                const loadOverview = async () => {
+                    const data = await apiFetch({ path: '/api/coze/overview', auth: true, timeoutMs: 15000 });
+                    overview.patientCount = data.patientCount ?? null;
+                    overview.todayCheckinCount = data.todayCheckinCount ?? null;
+                    overview.pendingAlertCount = data.pendingAlertCount ?? null;
+                    overview.pendingFollowupCount = data.pendingFollowupCount ?? null;
+                    overview.recentAlerts = Array.isArray(data.recentAlerts) ? data.recentAlerts : [];
+                    overview.recentFollowups = Array.isArray(data.recentFollowups) ? data.recentFollowups : [];
+                    overview.chronicDistribution = Array.isArray(data.chronicDistribution) ? data.chronicDistribution : [];
+
+                    // 将概览的最近预警/回访同步到首页列表（保持 UI 结构）
+                    warnings.value = overview.recentAlerts.map((a, idx) => ({
+                        id: a.id || idx + 1,
+                        title: a.title || a.content || '预警',
+                        time: a.time || a.createdAt || '刚刚',
+                        patient: a.patient || a.patientName || '',
+                        level: (a.alertLevel || a.level || 'warning') === 'danger' ? 'danger' : 'warning',
+                        icon: (a.alertLevel || a.level) === 'danger' ? '🛑' : '⚠️'
+                    }));
+                    followups.value = overview.recentFollowups.map((f, idx) => ({
+                        id: f.id || idx + 1,
+                        patient: f.patient || f.patientName || '',
+                        typeLabel: f.followupType || f.typeLabel || '回访',
+                        time: f.time || f.createdAt || '',
+                        item: f.result || f.item || '',
+                        type: 'info',
+                        icon: '📋'
+                    }));
+                };
+
+                const mapRiskToStatus = (riskLevel) => {
+                    if (riskLevel === 'high') return '控制不佳';
+                    if (riskLevel === 'medium') return '控制一般';
+                    return '控制良好';
+                };
+
+                const pickAvatar = (gender) => (gender === '男' ? '👨' : '👩');
+
+                const loadPatients = async () => {
+                    const kw = (searchKeyword.value || '').trim();
+                    const page = currentPageNum.value || 1;
+                    const pageSize = 20;
+                    const data = await apiFetch({
+                        path: `/api/coze/patients?page=${encodeURIComponent(page)}&pageSize=${encodeURIComponent(pageSize)}&keyword=${encodeURIComponent(kw)}`,
+                        auth: true,
+                        timeoutMs: 15000
+                    });
+                    const list = Array.isArray(data.list) ? data.list : [];
+                    patients.value = list.map((p) => {
+                        const chronicTags = Array.isArray(p.chronicTags) ? p.chronicTags : [];
+                        const vit = p.latestVitals || {};
+                        const sugarVal = vit.bloodSugar && vit.bloodSugar.value != null ? String(vit.bloodSugar.value) : (vit.sugar && vit.sugar.value != null ? String(vit.sugar.value) : '--');
+                        const bpSys = vit.bloodPressure && vit.bloodPressure.systolic != null ? Number(vit.bloodPressure.systolic) : (vit.bp && vit.bp.systolic != null ? Number(vit.bp.systolic) : null);
+                        const bpDia = vit.bloodPressure && vit.bloodPressure.diastolic != null ? Number(vit.bloodPressure.diastolic) : (vit.bp && vit.bp.diastolic != null ? Number(vit.bp.diastolic) : null);
+                        const bpStr = bpSys && bpDia ? `${bpSys}/${bpDia}` : '--/--';
+                        return {
+                            id: p.id,
+                            name: p.name,
+                            age: p.age,
+                            gender: p.gender,
+                            phone: p.phoneMasked || p.maskedPhone || '--',
+                            condition: chronicTags.join('+') || '慢病管理',
+                            duration: '演示',
+                            status: mapRiskToStatus(p.riskLevel),
+                            glucose: sugarVal,
+                            hbA1c: null,
+                            sbp: bpSys || 0,
+                            bp: bpStr,
+                            avatar: pickAvatar(p.gender),
+                            deviceBound: false,
+                            tags: chronicTags.map((t, idx) => ({ id: idx + 1, name: t, color: '#1890ff' }))
+                        };
+                    });
+                };
+
+                const loadPatientSummary = async (patientId) => {
+                    const data = await apiFetch({ path: `/api/coze/patient/${patientId}/summary`, auth: true, timeoutMs: 15000 });
+                    const p = data.patient || {};
+                    const chronicTags = Array.isArray(p.chronicTags) ? p.chronicTags : (Array.isArray(p.chronic_tags) ? p.chronic_tags : []);
+                    const latestVitals = data.latestVitals || {};
+                    const sugar = latestVitals.bloodSugar || latestVitals.sugar || null;
+                    const bp = latestVitals.bloodPressure || latestVitals.bp || null;
+                    const sugarVal = sugar && sugar.value != null ? String(sugar.value) : '--';
+                    const bpSys = bp && bp.systolic != null ? Number(bp.systolic) : null;
+                    const bpDia = bp && bp.diastolic != null ? Number(bp.diastolic) : null;
+                    const bpStr = bpSys && bpDia ? `${bpSys}/${bpDia}` : '--/--';
+
+                    return {
+                        id: p.id || patientId,
+                        name: p.name || '患者',
+                        age: p.age || '--',
+                        gender: p.gender || '--',
+                        phone: p.phoneMasked || p.maskedPhone || '--',
+                        condition: chronicTags.join('+') || '慢病管理',
+                        duration: '演示',
+                        status: mapRiskToStatus(p.riskLevel || data.riskLevel),
+                        glucose: sugarVal,
+                        hbA1c: null,
+                        sbp: bpSys || 0,
+                        bp: bpStr,
+                        avatar: pickAvatar(p.gender),
+                        deviceBound: false,
+                        tags: chronicTags.map((t, idx) => ({ id: idx + 1, name: t, color: '#1890ff' })),
+                        // 原页面里显示的“指标卡片”之外额外挂载 summary，便于后续扩展
+                        __summary: data
+                    };
+                };
 
                 const warnings = ref([
                     { id: 1, title: '王建国 - 血糖偏高预警', time: '10分钟前', patient: '空腹血糖 8.6 mmol/L', level: 'warning', icon: '⚠️' },
@@ -2136,6 +2345,7 @@
                 };
 
                 const getHbA1cClass = (value) => {
+                    if (value == null || value === '' || Number.isNaN(Number(value))) return 'warning';
                     if (value < 7.0) return 'normal';
                     if (value < 8.0) return 'warning';
                     return 'danger';
@@ -2193,18 +2403,40 @@
                     return '#909399';
                 };
 
-                const handleLogin = () => {
+                const handleLogin = async () => {
+                    if (!loginForm.username || !loginForm.password) {
+                        ElementPlus.ElMessage.warning('请输入用户名和密码');
+                        return;
+                    }
                     loginLoading.value = true;
-                    setTimeout(() => {
-                        if (loginForm.username && loginForm.password) {
-                            isLoggedIn.value = true;
-                            loginLoading.value = false;
-                            nextTick(() => initCharts());
-                        } else {
-                            loginLoading.value = false;
-                            ElementPlus.ElMessage.warning('请输入用户名和密码');
-                        }
-                    }, 800);
+                    apiError.value = '';
+                    try {
+                        // 兼容演示：医生端输入 admin / 123 也映射到评委只读账号
+                        const username = String(loginForm.username || '').trim();
+                        const phone = /^\d{6,}$/.test(username) ? username : '13800138001';
+                        const password = String(loginForm.password || '');
+                        const data = await apiFetch({
+                            method: 'POST',
+                            path: '/api/login',
+                            body: { phone, password },
+                            auth: false,
+                            timeoutMs: 15000
+                        });
+                        if (!data || !data.token) throw new Error('登录失败');
+                        token.value = data.token;
+                        localStorage.setItem('demo_token', data.token);
+                        isLoggedIn.value = true;
+                        userInfo.name = (data.user && data.user.name) || '评委账号';
+                        userInfo.role = (data.user && data.user.role) || 'judge';
+
+                        await Promise.all([loadOverview(), loadPatients()]);
+                        nextTick(() => initCharts());
+                    } catch (e) {
+                        apiError.value = e.message || '登录失败';
+                        ElementPlus.ElMessage.error(apiError.value);
+                    } finally {
+                        loginLoading.value = false;
+                    }
                 };
 
                 const handleCommand = (command) => {
@@ -2216,16 +2448,27 @@
                 };
 
                 const viewPatient = (patient) => {
-                    currentPatient.value = patient;
                     patientDrawerVisible.value = true;
-                    nextTick(() => {
-                        if (document.getElementById('patientGlucoseChart')) {
-                            initPatientGlucoseChart();
+                    currentPatient.value = patient;
+                    apiError.value = '';
+                    (async () => {
+                        try {
+                            const full = await loadPatientSummary(patient.id);
+                            currentPatient.value = full;
+                            nextTick(() => {
+                                if (document.getElementById('patientGlucoseChart')) {
+                                    initPatientGlucoseChart();
+                                }
+                            });
+                        } catch (e) {
+                            apiError.value = e.message || '加载患者详情失败';
+                            ElementPlus.ElMessage.error(apiError.value);
                         }
-                    });
+                    })();
                 };
 
                 const addPatient = () => {
+                    if (onReadonlyWrite('新增患者')) return;
                     const newId = patients.value.length + 1;
                     patients.value.push({
                         id: newId,
@@ -2249,6 +2492,7 @@
                 };
 
                 const addTag = () => {
+                    if (onReadonlyWrite('新增标签')) return;
                     const newId = patientTags.value.length + 1;
                     patientTags.value.push({
                         id: newId,
@@ -2262,12 +2506,14 @@
 
                 const handleTagCommand = (cmd, tag) => {
                     if (cmd === 'delete') {
+                        if (onReadonlyWrite('删除标签')) return;
                         patientTags.value = patientTags.value.filter(t => t.id !== tag.id);
                         ElementPlus.ElMessage.success('标签已删除');
                     }
                 };
 
                 const saveThresholds = () => {
+                    if (onReadonlyWrite('保存阈值')) return;
                     ElementPlus.ElMessage.success('阈值设置已保存');
                 };
 
@@ -2291,6 +2537,7 @@
                 };
 
                 const uploadHealthData = () => {
+                    if (onReadonlyWrite('健康数据上传')) return;
                     ElementPlus.ElMessage.success('健康数据已上传，AI正在分析...');
                     setTimeout(() => {
                         ElementPlus.ElMessage.info('分析完成：血糖控制良好，继续保持');
@@ -2298,6 +2545,7 @@
                 };
 
                 const bookAppointment = (hospital) => {
+                    if (onReadonlyWrite('预约挂号')) return;
                     ElementPlus.ElMessage.success('已预约' + hospital.name + ' ' + hospital.dept);
                 };
 
@@ -2344,6 +2592,7 @@
                 };
 
                 const bindDevice = (device) => {
+                    if (onReadonlyWrite('设备绑定/解绑')) return;
                     if (device.patient) {
                         device.patient = '';
                         device.status = 'offline';
@@ -2359,6 +2608,7 @@
                 };
 
                 const executeRecall = (task) => {
+                    if (onReadonlyWrite('执行回访')) return;
                     ElementPlus.ElMessage.success('正在执行回访：' + task.patient);
                 };
 
@@ -2371,8 +2621,34 @@
                 };
 
                 const exportCallRecord = (call) => {
+                    if (onReadonlyWrite('导出通话记录')) return;
                     ElementPlus.ElMessage.success('正在导出：' + call.patient + '的通话记录');
                 };
+
+                watch([searchKeyword, currentPageNum], () => {
+                    if (!isLoggedIn.value) return;
+                    loadPatients().catch((e) => {
+                        apiError.value = e.message || '加载患者列表失败';
+                    });
+                });
+
+                onMounted(async () => {
+                    try {
+                        // 尝试自动登录（已保存 token 时）
+                        if (token.value) {
+                            isLoggedIn.value = true;
+                            await Promise.all([loadOverview(), loadPatients()]);
+                            nextTick(() => initCharts());
+                        }
+                    } catch (e) {
+                        // token 失效则回到登录态
+                        isLoggedIn.value = false;
+                        token.value = '';
+                        localStorage.removeItem('demo_token');
+                    } finally {
+                        loading.value = false;
+                    }
+                });
 
                 // 图表初始化
                 let glucoseChart, targetChart, bpChart, conditionChart, glucoseTrendChart, hbA1cChart, bpTrendChart, bpAchievementChart, followupChart, checkupChart, patientGlucoseChart, tcmDistChart;
@@ -2616,12 +2892,9 @@
 
                 window.addEventListener('resize', handleResize);
 
-                onMounted(() => {
-                    setTimeout(() => { loading.value = false; }, 500);
-                });
-
                 return {
                     loading, isLoggedIn, loginLoading, currentPage, glucosePeriod, loginForm, userInfo,
+                    overview, apiError, apiWakingUp, publicReadonly, onReadonlyWrite,
                     mainMenu, aiMenu, deviceMenu, systemMenu, patients, filteredPatients, warnings, followups,
                     currentGlucose, currentBP, glucoseRecords, medications, medicationStats, followupList, notifySettings, thresholds,
                     searchKeyword, filterCondition, filterStatus, filterTag, currentPageNum,
