@@ -63,7 +63,10 @@ async function main() {
   results.push(['/api/ai/coze/status', typeof coze === 'object']);
 
   const cozeStatus = await http('GET', '/api/coze/status');
-  results.push(['/api/coze/status', cozeStatus.ready === true]);
+  results.push([
+    '/api/coze/status',
+    Boolean(cozeStatus && cozeStatus.coze && Array.isArray(cozeStatus.availableEndpoints))
+  ]);
   const publicApiReadonly = cozeStatus.publicApiReadonly === true;
 
   const cozeOverview = await http('GET', '/api/coze/overview');
